@@ -5,28 +5,46 @@ import { usePathname } from "next/navigation";
 import {
   CalendarDaysIcon,
   HomeIcon,
+  HomeModernIcon,
+  ReceiptPercentIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
 import SignOutButton from "./SignOutButton";
 
-const navLinks = [
+const reservations = {
+  name: "Reservations",
+  href: "/account/reservations",
+  icon: CalendarDaysIcon,
+};
+const profile = {
+  name: "My account",
+  href: "/account/profile",
+  icon: UserIcon,
+};
+
+// While the guest is checked in, the overview becomes My Stay, with its
+// charges one click away
+const stayingLinks = [
+  { name: "My stay", href: "/account", icon: HomeModernIcon },
+  { name: "Stay charges", href: "/account#charges", icon: ReceiptPercentIcon },
+  reservations,
+  profile,
+];
+const links = [
   { name: "Overview", href: "/account", icon: HomeIcon },
-  {
-    name: "Reservations",
-    href: "/account/reservations",
-    icon: CalendarDaysIcon,
-  },
-  { name: "Guest profile", href: "/account/profile", icon: UserIcon },
+  reservations,
+  profile,
 ];
 
-function SideNavigation() {
+function SideNavigation({ isStaying = false }) {
   const pathname = usePathname();
+  const navLinks = isStaying ? stayingLinks : links;
 
-  // Editing a reservation still lights up "Reservations"
+  // Editing a reservation still lights up "Reservations". A link to a part
+  // of a page never lights up on its own.
   function isActive(href) {
-    return href === "/account"
-      ? pathname === href
-      : pathname.startsWith(href);
+    if (href.includes("#")) return false;
+    return href === "/account" ? pathname === href : pathname.startsWith(href);
   }
 
   return (

@@ -3,9 +3,15 @@
 import { useOptimistic } from "react";
 import ReservationCard from "./ReservationCard";
 import { cancelBooking } from "../_lib/actions";
-import { toISODate } from "../_lib/stay";
+import { sortBookings } from "../_lib/account";
 
-function ReservationList({ bookings }) {
+const groups = [
+  { key: "stay", title: "Staying now" },
+  { key: "upcoming", title: "Upcoming" },
+  { key: "history", title: "Past stays" },
+];
+
+function ReservationList({ bookings, today }) {
   // A cancelled reservation shows as cancelled at once, while the database
   // catches up. It stays in the list, under past stays.
   const [optimisticBookings, optimisticCancel] = useOptimistic(
@@ -21,36 +27,29 @@ function ReservationList({ bookings }) {
     await cancelBooking(bookingId);
   }
 
-  const today = toISODate(new Date());
-
-  // Reserved and in-house stays that haven't ended come first; finished,
-  // cancelled and missed ones below, newest first
-  const upcoming = optimisticBookings.filter(
-    (booking) =>
-      (booking.status === "reserved" || booking.status === "checked_in") &&
-      booking.endDate >= today
-  );
-  const past = optimisticBookings
-    .filter((booking) => !upcoming.includes(booking))
-    .reverse();
+  // The stay that is checked in, reservations ahead, then everything else
+  const sorted = sortBookings(optimisticBookings, today);
+  const lists = {
+    stay: sorted.stay ? [sorted.stay] : [],
+    upcoming: sorted.upcoming,
+    history: sorted.history,
+  };
 
   return (
     <div className="space-y-10">
-      {[
-        { title: "Upcoming", list: upcoming },
-        { title: "Past and cancelled", list: past },
-      ].map(
-        ({ title, list }) =>
-          list.length > 0 && (
-            <section key={title}>
+      {groups.map(
+        ({ key, title }) =>
+          lists[key].length > 0 && (
+            <section key={key}>
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-500">
-                {title} &middot; {list.length}
+                {title} &middot; {lists[key].length}
               </h2>
 
               <ul className="space-y-4">
-                {list.map((booking) => (
+                {lists[key].map((booking) => (
                   <ReservationCard
                     booking={booking}
+                    today={today}
                     onCancel={handleCancel}
                     key={booking.id}
                   />

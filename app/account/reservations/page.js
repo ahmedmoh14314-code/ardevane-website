@@ -1,14 +1,14 @@
 import Link from "next/link";
 import ReservationList from "@/app/_components/ReservationList";
 import { getGuest } from "@/app/_lib/auth";
-import { getBookings } from "@/app/_lib/data-service";
+import { getBookings, getPropertyToday } from "@/app/_lib/data-service";
 
 export const metadata = {
   title: "Reservations",
 };
 
 export default async function Page() {
-  const guest = await getGuest();
+  const [guest, today] = await Promise.all([getGuest(), getPropertyToday()]);
   const bookings = await getBookings(guest.id);
 
   return (
@@ -26,7 +26,7 @@ export default async function Page() {
           </Link>
         </div>
       ) : (
-        <ReservationList bookings={bookings} />
+        <ReservationList bookings={bookings} today={today} />
       )}
     </div>
   );

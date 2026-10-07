@@ -1,78 +1,59 @@
 import Link from "next/link";
-import Image from "next/image";
-import { format } from "date-fns";
-import { toDay, toISODate } from "../_lib/stay";
 import { getGuest, getUser } from "../_lib/auth";
-import { getBookings } from "../_lib/data-service";
-import { formatCurrency } from "../_lib/pricing";
-import StatusTag from "../_components/StatusTag";
+import {
+  getBookings,
+  getPropertyToday,
+  getStayCharges,
+} from "../_lib/data-service";
+import { sortBookings } from "../_lib/account";
+import MyStay from "../_components/MyStay";
+import ReservationList from "../_components/ReservationList";
 
 export const metadata = {
   title: "Guest area",
 };
 
+// The account changes with the guest's stay: My Stay while they are checked
+// in, their next reservation before that, and a way to book when there is
+// nothing planned.
 export default async function Page() {
-  const [user, guest] = await Promise.all([getUser(), getGuest()]);
+  const [user, guest, today] = await Promise.all([
+    getUser(),
+    getGuest(),
+    getPropertyToday(),
+  ]);
   const bookings = await getBookings(guest.id);
+  const { state, stay, upcoming, history } = sortBookings(bookings, today);
 
+  const charges = stay ? await getStayCharges(stay.id) : [];
   const firstName = user.name.split(" ").at(0);
-
-  // The stay that matters most: the one happening now, or the next one
-  const today = toISODate(new Date());
-  const nextStay = bookings.find(
-    (booking) =>
-      booking.status === "checked_in" ||
-      (booking.status === "reserved" && booking.startDate >= today)
-  );
-
   const isProfileDone = Boolean(guest?.nationality && guest?.nationalID);
 
   return (
     <div className="space-y-8">
       <header>
         <p className="eyebrow mb-2">Guest area</p>
-        <h1 className="page-title">Welcome, {firstName}</h1>
+        <h1 className="page-title">
+          {state === "staying"
+            ? `Welcome to Ardevane, ${firstName}`
+            : `Welcome, ${firstName}`}
+        </h1>
       </header>
 
-      {nextStay ? (
-        <Link
-          href="/account/reservations"
-          className="card group grid overflow-hidden transition-shadow hover:shadow-lift sm:grid-cols-[14rem_1fr]"
-        >
-          <div className="relative aspect-[16/10] sm:aspect-auto">
-            <Image
-              src={nextStay.cabins.image}
-              alt={`Cabin ${nextStay.cabins.name}`}
-              fill
-              sizes="(min-width: 640px) 14rem, 100vw"
-              className="object-cover"
-            />
-          </div>
+      {state === "staying" && (
+        <MyStay
+          guestName={user.name}
+          booking={stay}
+          charges={charges}
+          today={today}
+        />
+      )}
 
-          <div className="space-y-3 p-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="eyebrow">
-                {nextStay.status === "checked_in" ? "Your stay" : "Next stay"}
-              </p>
-              <StatusTag status={nextStay.status} />
-            </div>
+      {state === "upcoming" && (
+        <ReservationList bookings={upcoming} today={today} />
+      )}
 
-            <h2 className="font-display text-3xl text-brand-900">
-              Cabin {nextStay.cabins.name}
-            </h2>
-
-            <p className="text-ink-600">
-              {format(toDay(nextStay.startDate), "EEE, MMM d")} &ndash;{" "}
-              {format(toDay(nextStay.endDate), "EEE, MMM d, yyyy")} &middot;{" "}
-              {nextStay.numNights} nights
-            </p>
-
-            <p className="font-semibold text-ink-800">
-              {formatCurrency(nextStay.totalPrice)}
-            </p>
-          </div>
-        </Link>
-      ) : (
+      {state === "none" && (
         <div className="card p-8">
           <h2 className="mb-2 font-display text-2xl text-brand-900">
             No stay planned yet
@@ -81,12 +62,17 @@ export default async function Page() {
             Your next escape is a few clicks away.
           </p>
           <Link href="/cabins" className="btn-primary">
-            Find a cabin
+            Book a stay
           </Link>
         </div>
       )}
 
-      {!isProfileDone && (
+      {/* While staying, the next reservation is still worth a glance */}
+      {state === "staying" && upcoming.length > 0 && (
+        <ReservationList bookings={upcoming} today={today} />
+      )}
+
+      {state !== "staying" && !isProfileDone && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold-200 bg-gold-100 p-6">
           <p className="text-ink-700">
             <span className="font-semibold">Save time at check-in.</span> Add
@@ -96,6 +82,10 @@ export default async function Page() {
             Complete profile
           </Link>
         </div>
+      )}
+
+      {state === "none" && history.length > 0 && (
+        <ReservationList bookings={history} today={today} />
       )}
     </div>
   );

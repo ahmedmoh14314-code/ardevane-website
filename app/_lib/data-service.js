@@ -1,5 +1,6 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
-import { asSentence, takenNights } from "./stay";
+import { asSentence, takenNights, toISODate } from "./stay";
 import { supabase } from "./supabase/public";
 import { createClient } from "./supabase/server";
 
@@ -94,8 +95,13 @@ export async function quoteBooking({ cabinId, from, to, guests }) {
   return { quote: data[0] };
 }
 
-export async function getBookings(guestId) {
-  const { data, error } = await createClient()
+// A guest's bookings, each with its folio (what the stay costs and what
+// has been paid, worked out by the database). cache() makes it one request
+// per page, however many components ask.
+export const getBookings = cache(async function (guestId) {
+  const supabase = createClient();
+
+  const { data: bookings, error } = await supabase
     .from("bookings")
     .select(
       "id, reference, created_at, startDate, endDate, numNights, numGuests, totalPrice, status, cancelledAt, cabinId, cabins(name, image)"
@@ -106,6 +112,55 @@ export async function getBookings(guestId) {
   if (error) {
     console.error(error);
     throw new Error("Bookings could not get loaded");
+  }
+
+  if (!bookings.length) return [];
+
+  // The guest can read the folios of their own bookings, and only those
+  const { data: folios, error: folioError } = await supabase
+    .from("booking_folios")
+    .select("bookingId, accommodation, extras, total, paid, remaining")
+    .in(
+      "bookingId",
+      bookings.map((booking) => booking.id)
+    );
+
+  if (folioError) {
+    console.error(folioError);
+    throw new Error("Bookings could not get loaded");
+  }
+
+  return bookings.map((booking) => ({
+    ...booking,
+    folio: folios.find((folio) => folio.bookingId === booking.id) ?? null,
+  }));
+});
+
+// What was added to a stay, for the guest to read. Charges and payments are
+// written only by the front desk.
+export async function getStayCharges(bookingId) {
+  const { data, error } = await createClient()
+    .from("charges")
+    .select("id, created_at, description, amount")
+    .eq("bookingId", bookingId)
+    .order("created_at");
+
+  if (error) {
+    console.error(error);
+    throw new Error("Stay charges could not be loaded");
+  }
+
+  return data;
+}
+
+// "Today" where the cabins are, so Day 2 of 5 is right wherever the
+// server runs
+export async function getPropertyToday() {
+  const { data, error } = await supabase.rpc("property_today");
+
+  if (error) {
+    console.error(error);
+    return toISODate(new Date());
   }
 
   return data;

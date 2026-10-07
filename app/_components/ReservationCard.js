@@ -1,6 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  DocumentTextIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
 import { format, formatDistance, isToday } from "date-fns";
 import CancelReservation from "./CancelReservation";
 import StatusTag from "./StatusTag";
@@ -12,7 +16,7 @@ export const formatDistanceFromNow = (dateStr) =>
     addSuffix: true,
   }).replace("about ", "");
 
-function ReservationCard({ booking, onCancel }) {
+function ReservationCard({ booking, today, onCancel }) {
   const {
     id,
     reference,
@@ -23,10 +27,16 @@ function ReservationCard({ booking, onCancel }) {
     numGuests,
     status,
     created_at,
+    folio,
     cabins: { name, image },
   } = booking;
 
   const isClosed = status === "cancelled" || status === "no_show";
+
+  // Once the guest has arrived the folio is what counts: the nights plus
+  // anything added, and what has been paid. Before that, the nights alone.
+  const hasFolio =
+    (status === "checked_in" || status === "checked_out") && folio;
 
   return (
     <li
@@ -65,9 +75,33 @@ function ReservationCard({ booking, onCancel }) {
         </p>
 
         <div className="mt-auto flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-          <p className="text-lg font-semibold text-ink-800">
-            {formatCurrency(totalPrice)}
-          </p>
+          {hasFolio ? (
+            <>
+              <p className="text-lg font-semibold text-ink-800">
+                {formatCurrency(folio.total)}
+              </p>
+              <p
+                className={
+                  folio.remaining > 0
+                    ? "font-medium text-[#9b3b23]"
+                    : "text-brand-700"
+                }
+              >
+                {folio.remaining > 0
+                  ? `${formatCurrency(folio.paid)} paid · ${formatCurrency(folio.remaining)} remaining`
+                  : "Paid in full"}
+              </p>
+            </>
+          ) : (
+            <p className="text-lg font-semibold text-ink-800">
+              {formatCurrency(totalPrice)}
+              {status === "reserved" && (
+                <span className="ml-1 text-sm font-normal text-ink-500">
+                  accommodation
+                </span>
+              )}
+            </p>
+          )}
           <p className="text-ink-500">
             {numGuests} guest{numGuests > 1 && "s"}
           </p>
@@ -78,7 +112,19 @@ function ReservationCard({ booking, onCancel }) {
         </div>
       </div>
 
-      {canChangeOnline(booking) && (
+      {status === "checked_in" && (
+        <CardLink href="/account" icon={ArrowRightIcon}>
+          My stay
+        </CardLink>
+      )}
+
+      {status === "checked_out" && (
+        <CardLink href={`/account/reservations/${id}`} icon={DocumentTextIcon}>
+          Details
+        </CardLink>
+      )}
+
+      {canChangeOnline(booking, today) && (
         <div className="flex border-t border-cream-200 sm:w-32 sm:flex-col sm:border-l sm:border-t-0">
           <Link
             href={`/account/reservations/edit/${id}`}
@@ -91,6 +137,21 @@ function ReservationCard({ booking, onCancel }) {
         </div>
       )}
     </li>
+  );
+}
+
+// One action on the side of a card, like "My stay" or "Details"
+function CardLink({ href, icon: Icon, children }) {
+  return (
+    <div className="flex border-t border-cream-200 sm:w-32 sm:flex-col sm:border-l sm:border-t-0">
+      <Link
+        href={href}
+        className="flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-ink-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
+      >
+        <Icon className="h-5 w-5" />
+        <span>{children}</span>
+      </Link>
+    </div>
   );
 }
 
