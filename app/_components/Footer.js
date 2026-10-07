@@ -50,8 +50,8 @@ function Footer() {
 
       <div className="border-t border-brand-800">
         <p className="mx-auto max-w-7xl px-4 py-5 text-xs text-brand-300 sm:px-8">
-          &copy; {year} Ardevane. Pay on arrival. Change or cancel for free until
-          your arrival day.
+          &copy; {year} Ardevane. Pay at the cabin. Change or cancel for free
+          until the day before you arrive.
         </p>
       </div>
     </footer>

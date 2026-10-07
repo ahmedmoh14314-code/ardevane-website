@@ -1,25 +1,13 @@
-// One place for the money, used by the price shown in the browser and by
-// the server when it saves the booking, so the two can never disagree.
-// The formula is the same one Ardevane Operations uses at check-in.
+// Prices for showing while a guest picks dates. The price that counts is
+// worked out by the database (quote_booking, create_booking) from the same
+// formula: nights × (regular price − discount).
 
 export function getNightlyPrice({ regularPrice, discount }) {
   return regularPrice - (discount || 0);
 }
 
-export function getBookingPrice({
-  cabin,
-  numNights,
-  numGuests,
-  hasBreakfast,
-  breakfastPrice,
-}) {
-  const cabinPrice = numNights * getNightlyPrice(cabin);
-
-  const extrasPrice = hasBreakfast
-    ? numNights * numGuests * breakfastPrice
-    : 0;
-
-  return { cabinPrice, extrasPrice, totalPrice: cabinPrice + extrasPrice };
+export function getStayPrice(cabin, numNights) {
+  return numNights * getNightlyPrice(cabin);
 }
 
 export function formatCurrency(value) {

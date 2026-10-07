@@ -1,24 +1,20 @@
-// The same status colours as the bookings table in Ardevane Operations, so
-// a guest and the front desk always see a stay the same way
+// The same status words and colours as Ardevane Operations, so a guest and
+// the front desk always see a stay the same way
 const statuses = {
-  unconfirmed: {
-    label: "Reserved",
-    className: "bg-[#f8ecd2] text-[#8a5a12]",
-  },
-  "checked-in": {
-    label: "Checked in",
-    className: "bg-[#e2efe6] text-[#1d5a3d]",
-  },
-  "checked-out": {
+  reserved: { label: "Reserved", className: "bg-[#e3eef1] text-[#2e5f6e]" },
+  checked_in: { label: "Checked in", className: "bg-[#e2efe6] text-[#1d5a3d]" },
+  checked_out: {
     label: "Checked out",
     className: "bg-[#ece8e1] text-[#5a5248]",
   },
+  cancelled: { label: "Cancelled", className: "bg-[#f8e2da] text-[#9b3b23]" },
+  no_show: { label: "No-show", className: "bg-[#f1e5d9] text-[#6b4426]" },
   paid: { label: "Paid", className: "bg-[#e2efe6] text-[#1d5a3d]" },
-  due: { label: "Pay on arrival", className: "bg-[#e3eef1] text-[#2e5f6e]" },
+  due: { label: "Pay at the cabin", className: "bg-[#f8ecd2] text-[#8a5a12]" },
 };
 
 function StatusTag({ status }) {
-  const { label, className } = statuses[status] ?? statuses.unconfirmed;
+  const { label, className } = statuses[status] ?? statuses.reserved;
 
   return (
     <span

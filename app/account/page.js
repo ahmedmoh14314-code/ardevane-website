@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { format, isFuture, isToday } from "date-fns";
+import { format } from "date-fns";
+import { toDay, toISODate } from "../_lib/stay";
 import { getGuest, getUser } from "../_lib/auth";
 import { getBookings } from "../_lib/data-service";
 import { formatCurrency } from "../_lib/pricing";
@@ -17,12 +18,11 @@ export default async function Page() {
   const firstName = user.name.split(" ").at(0);
 
   // The stay that matters most: the one happening now, or the next one
+  const today = toISODate(new Date());
   const nextStay = bookings.find(
     (booking) =>
-      booking.status === "checked-in" ||
-      (booking.status === "unconfirmed" &&
-        (isFuture(new Date(booking.startDate)) ||
-          isToday(new Date(booking.startDate))))
+      booking.status === "checked_in" ||
+      (booking.status === "reserved" && booking.startDate >= today)
   );
 
   const isProfileDone = Boolean(guest?.nationality && guest?.nationalID);
@@ -52,7 +52,7 @@ export default async function Page() {
           <div className="space-y-3 p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="eyebrow">
-                {nextStay.status === "checked-in" ? "Your stay" : "Next stay"}
+                {nextStay.status === "checked_in" ? "Your stay" : "Next stay"}
               </p>
               <StatusTag status={nextStay.status} />
             </div>
@@ -62,8 +62,8 @@ export default async function Page() {
             </h2>
 
             <p className="text-ink-600">
-              {format(new Date(nextStay.startDate), "EEE, MMM d")} &ndash;{" "}
-              {format(new Date(nextStay.endDate), "EEE, MMM d, yyyy")} &middot;{" "}
+              {format(toDay(nextStay.startDate), "EEE, MMM d")} &ndash;{" "}
+              {format(toDay(nextStay.endDate), "EEE, MMM d, yyyy")} &middot;{" "}
               {nextStay.numNights} nights
             </p>
 

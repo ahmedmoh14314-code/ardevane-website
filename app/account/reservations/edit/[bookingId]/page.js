@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import EditReservationForm from "@/app/_components/EditReservationForm";
 import { getGuest } from "@/app/_lib/auth";
 import { getGuestBooking, getSettings } from "@/app/_lib/data-service";
+import { canChangeOnline, toDay } from "@/app/_lib/stay";
 
 export const metadata = {
   title: "Edit reservation",
@@ -30,16 +31,23 @@ export default async function Page({ params }) {
       </Link>
 
       <header className="mb-8">
-        <p className="eyebrow mb-2">Reservation #{booking.id}</p>
+        <p className="eyebrow mb-2">Reservation {booking.reference}</p>
         <h1 className="page-title mb-2">Cabin {booking.cabins.name}</h1>
         <p className="text-ink-600">
-          {format(new Date(booking.startDate), "EEE, MMM d")} &ndash;{" "}
-          {format(new Date(booking.endDate), "EEE, MMM d, yyyy")} &middot;{" "}
+          {format(toDay(booking.startDate), "EEE, MMM d")} &ndash;{" "}
+          {format(toDay(booking.endDate), "EEE, MMM d, yyyy")} &middot;{" "}
           {booking.numNights} nights
         </p>
       </header>
 
-      <EditReservationForm booking={booking} settings={settings} />
+      {canChangeOnline(booking) ? (
+        <EditReservationForm booking={booking} settings={settings} />
+      ) : (
+        <p className="card p-6 text-ink-600">
+          This reservation can no longer be changed online. Please contact
+          the front desk.
+        </p>
+      )}
     </div>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { XCircleIcon } from "@heroicons/react/24/outline";
 import SpinnerMini from "./SpinnerMini";
 
-// Two taps instead of a browser pop-up: the first asks, the second cancels
-function DeleteReservation({ bookingId, onDelete }) {
+// Two taps instead of a browser pop-up: the first asks, the second cancels.
+// The reservation stays on record, marked cancelled.
+function CancelReservation({ bookingId, onCancel }) {
   const [isPending, startTransition] = useTransition();
   const [isAsking, setIsAsking] = useState(false);
 
@@ -23,7 +24,7 @@ function DeleteReservation({ bookingId, onDelete }) {
   function handleClick() {
     if (!isAsking) return setIsAsking(true);
 
-    startTransition(() => onDelete(bookingId));
+    startTransition(() => onCancel(bookingId));
   }
 
   return (
@@ -40,7 +41,7 @@ function DeleteReservation({ bookingId, onDelete }) {
         <SpinnerMini />
       ) : (
         <>
-          <TrashIcon className="h-5 w-5" />
+          <XCircleIcon className="h-5 w-5" />
           <span>{isAsking ? "Sure?" : "Cancel"}</span>
         </>
       )}
@@ -48,4 +49,4 @@ function DeleteReservation({ bookingId, onDelete }) {
   );
 }
 
-export default DeleteReservation;
+export default CancelReservation;

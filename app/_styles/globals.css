@@ -117,6 +117,13 @@
   opacity: 0.3 !important;
 }
 
+/* The picker also disables days too close to the arrival for the shortest
+   stay. Inside a finished selection those are part of the stay, so they
+   don't fade. (A selection over a taken night is cleared altogether.) */
+.rdp-day_selected.rdp-day_disabled {
+  opacity: 1 !important;
+}
+
 .rdp-caption_label,
 .rdp-dropdown {
   font-family: var(--font-display);

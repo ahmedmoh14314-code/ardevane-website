@@ -83,7 +83,8 @@ export default async function Page() {
             </p>
             <p>
               There is nothing to pay until you arrive, and you can change or
-              cancel a stay from your guest area until the day you check in.
+              cancel a stay from your guest area until the day before you
+              arrive.
             </p>
 
             <Link href="/cabins" className="btn-primary px-8 py-4">

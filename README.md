@@ -24,10 +24,11 @@ Next.js 14 (App Router, Server Components, Server Actions) · React · Tailwind 
 ## Under the hood
 
 - Guests and staff share one Supabase Auth, but being signed in gives no staff rights: staff are the accounts on the dashboard's team list. A guest reads their own profile and bookings as themselves, so the database's access rules decide what they see.
-- The browser only sends a cabin and two dates. Nights, prices, guest limits and free dates are all checked again on the server before a booking is saved, so a price can't be changed from the browser and two guests can't book the same night.
-- One pricing module is shared by the price the guest sees and the price the server saves.
+- Browsing, picking dates and seeing the price need no account. Signing in only comes at the final confirmation, and every way in (Google, email, the confirmation link) comes back to the same review page with the stay intact.
+- The browser only sends a cabin, two days and a number of guests. The database checks every rule again (open cabin, stay length, capacity, free nights) and sets the price itself, and a no-overlap constraint makes two guests booking the same night impossible, even at the same moment.
+- Cancelling keeps the reservation, marked cancelled, and frees its nights. Each booking has a short reference like ARD-7K3Q9P.
 - Guests sign up with their name, email and password, or continue with Google. The first sign in creates their guest profile, or takes over the one the hotel already had for their email after a phone booking.
-- Saving a booking still uses the secret key on the server, after checking who is signed in. It moves into database functions in the next step, and the key goes with it.
+- The website holds no secret key: it only ever acts as the visitor or the signed-in guest, and the database decides what each may do.
 - Cabin pages are generated at build time and refreshed every hour.
 
 ## Running it locally

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCurrency, getBookingPrice, getNightlyPrice } from "./pricing";
+import { formatCurrency, getNightlyPrice, getStayPrice } from "./pricing";
 
 const cabin = { regularPrice: 350, discount: 25 };
 
@@ -9,28 +9,8 @@ describe("pricing", () => {
     expect(getNightlyPrice({ regularPrice: 250, discount: null })).toBe(250);
   });
 
-  it("adds breakfast per guest, per night", () => {
-    expect(
-      getBookingPrice({
-        cabin,
-        numNights: 3,
-        numGuests: 2,
-        hasBreakfast: true,
-        breakfastPrice: 15,
-      })
-    ).toEqual({ cabinPrice: 975, extrasPrice: 90, totalPrice: 1065 });
-  });
-
-  it("charges nothing extra without breakfast", () => {
-    expect(
-      getBookingPrice({
-        cabin,
-        numNights: 3,
-        numGuests: 2,
-        hasBreakfast: false,
-        breakfastPrice: 15,
-      }).totalPrice
-    ).toBe(975);
+  it("prices a stay by its nights", () => {
+    expect(getStayPrice(cabin, 3)).toBe(975);
   });
 
   it("shows whole dollars", () => {

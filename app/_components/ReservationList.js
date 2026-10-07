@@ -1,26 +1,34 @@
 "use client";
 
 import { useOptimistic } from "react";
-import { isPast } from "date-fns";
 import ReservationCard from "./ReservationCard";
-import { deleteBooking } from "../_lib/actions";
+import { cancelBooking } from "../_lib/actions";
+import { toISODate } from "../_lib/stay";
 
 function ReservationList({ bookings }) {
-  const [optimisticBookings, optimisticDelete] = useOptimistic(
+  // A cancelled reservation shows as cancelled at once, while the database
+  // catches up. It stays in the list, under past stays.
+  const [optimisticBookings, optimisticCancel] = useOptimistic(
     bookings,
     (curBookings, bookingId) =>
-      curBookings.filter((booking) => booking.id !== bookingId)
+      curBookings.map((booking) =>
+        booking.id === bookingId ? { ...booking, status: "cancelled" } : booking
+      )
   );
 
-  async function handleDelete(bookingId) {
-    optimisticDelete(bookingId);
-    await deleteBooking(bookingId);
+  async function handleCancel(bookingId) {
+    optimisticCancel(bookingId);
+    await cancelBooking(bookingId);
   }
 
-  // Stays still to come (or happening now) first, finished ones below
+  const today = toISODate(new Date());
+
+  // Reserved and in-house stays that haven't ended come first; finished,
+  // cancelled and missed ones below, newest first
   const upcoming = optimisticBookings.filter(
     (booking) =>
-      booking.status !== "checked-out" && !isPast(new Date(booking.endDate))
+      (booking.status === "reserved" || booking.status === "checked_in") &&
+      booking.endDate >= today
   );
   const past = optimisticBookings
     .filter((booking) => !upcoming.includes(booking))
@@ -30,7 +38,7 @@ function ReservationList({ bookings }) {
     <div className="space-y-10">
       {[
         { title: "Upcoming", list: upcoming },
-        { title: "Past stays", list: past },
+        { title: "Past and cancelled", list: past },
       ].map(
         ({ title, list }) =>
           list.length > 0 && (
@@ -43,7 +51,7 @@ function ReservationList({ bookings }) {
                 {list.map((booking) => (
                   <ReservationCard
                     booking={booking}
-                    onDelete={handleDelete}
+                    onCancel={handleCancel}
                     key={booking.id}
                   />
                 ))}

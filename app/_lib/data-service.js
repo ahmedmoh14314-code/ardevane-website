@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-import { eachDayOfInterval, startOfToday } from "date-fns";
+import { asSentence, takenNights } from "./stay";
 import { supabase } from "./supabase/public";
-import { supabaseAdmin } from "./supabase/admin";
 import { createClient } from "./supabase/server";
 
 /////////////
@@ -58,57 +57,48 @@ export async function getCabinImages(cabinId) {
 /////////////
 // BOOKINGS
 
-// Every day that is taken from today on. Only the dates leave the
-// database, never who booked them.
+// The nights of a cabin that are taken from today on, as Dates. The
+// database sends only date ranges, never who booked them.
 export async function getBookedDatesByCabinId(cabinId) {
-  const today = startOfToday().toISOString();
-
-  const { data, error } = await supabaseAdmin
-    .from("bookings")
-    .select("startDate, endDate")
-    .eq("cabinId", cabinId)
-    .neq("status", "cancelled")
-    .gte("endDate", today);
+  const { data, error } = await supabase.rpc("get_booked_dates", {
+    p_cabin_id: cabinId,
+  });
 
   if (error) {
     console.error(error);
     throw new Error("Bookings could not get loaded");
   }
 
-  return data
-    .map((booking) =>
-      eachDayOfInterval({
-        start: new Date(booking.startDate),
-        end: new Date(booking.endDate),
-      })
-    )
-    .flat();
+  return takenNights(data);
 }
 
-// True when another stay in this cabin overlaps these dates. A guest may
-// arrive on the day the last one leaves.
-export async function isCabinTaken(cabinId, startDate, endDate) {
-  const { count, error } = await supabaseAdmin
-    .from("bookings")
-    .select("id", { count: "exact", head: true })
-    .eq("cabinId", cabinId)
-    .neq("status", "cancelled")
-    .lt("startDate", endDate.toISOString())
-    .gt("endDate", startDate.toISOString());
+// The database's price for a stay, or its reason for refusing it. Anyone may
+// ask, signed in or not.
+export async function quoteBooking({ cabinId, from, to, guests }) {
+  const { data, error } = await supabase.rpc("quote_booking", {
+    p_cabin_id: cabinId,
+    p_start_date: from,
+    p_end_date: to,
+    p_num_guests: guests,
+  });
 
-  if (error) {
-    console.error(error);
-    throw new Error("Availability could not be checked");
-  }
+  // 22023 = a rule the stay breaks; the message says which
+  if (error)
+    return {
+      error:
+        error.code === "22023"
+          ? asSentence(error.message)
+          : "This stay could not be priced. Please try again.",
+    };
 
-  return count > 0;
+  return { quote: data[0] };
 }
 
 export async function getBookings(guestId) {
   const { data, error } = await createClient()
     .from("bookings")
     .select(
-      "id, created_at, startDate, endDate, numNights, numGuests, totalPrice, extrasPrice, hasBreakfast, isPaid, status, cabinId, cabins(name, image)"
+      "id, reference, created_at, startDate, endDate, numNights, numGuests, totalPrice, isPaid, status, cancelledAt, cabinId, cabins(name, image)"
     )
     .eq("guestId", guestId)
     .order("startDate");

@@ -3,29 +3,25 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { endOfDay, isPast, startOfToday, subDays } from "date-fns";
 
-import { getGuest } from "./auth";
 import { createClient } from "./supabase/server";
-import { supabaseAdmin } from "./supabase/admin";
+import { asSentence, reviewPath } from "./stay";
 import { safeNextPath } from "./users";
-import {
-  getCabin,
-  getGuestBooking,
-  getSettings,
-  isCabinTaken,
-} from "./data-service";
-import { getBookingPrice } from "./pricing";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+// The database explains a booking it refuses in plain words (code 22023,
+// or P0002 for "not found"). Anything else gets a general message.
+function bookingError(error, fallback) {
+  console.error(error);
 
-// Every booking action starts here: no signed-in guest, no access. The guest
-// comes from the session cookie, never from anything the browser sends.
-async function getGuestId() {
-  const guest = await getGuest();
-  if (!guest) throw new Error("You need to be signed in");
+  return ["22023", "P0002"].includes(error.code)
+    ? asSentence(error.message)
+    : fallback;
+}
 
-  return guest.id;
+function readObservations(formData) {
+  return String(formData.get("observations") ?? "")
+    .trim()
+    .slice(0, 1000);
 }
 
 // The address of this site, for links that come back to it
@@ -38,19 +34,6 @@ function getOrigin() {
   );
 }
 
-// Changes are open until the arrival day is over, or until the guest is checked in
-function canStillChange(booking) {
-  return (
-    booking.status === "unconfirmed" &&
-    !isPast(endOfDay(new Date(booking.startDate)))
-  );
-}
-
-function readObservations(formData) {
-  return String(formData.get("observations") ?? "")
-    .trim()
-    .slice(0, 1000);
-}
 
 /////////////
 // PROFILE
@@ -74,7 +57,7 @@ export async function updateGuest(formData) {
     return {
       error:
         error.code === "22023"
-          ? `${error.message}.`
+          ? asSentence(error.message)
           : "Your profile could not be saved.",
     };
 
@@ -86,128 +69,60 @@ export async function updateGuest(formData) {
 /////////////
 // BOOKINGS
 
-// The browser only sends which cabin and which dates. Nights, prices and
-// every rule are worked out again here, from the database, so nobody can
-// book at their own price or squeeze into dates that are already taken.
-export async function createBooking(bookingData, formData) {
-  const guestId = await getGuestId();
+// Confirm the stay on the review page. The form only says which cabin, which
+// days and how many guests; create_booking checks every rule again and works
+// out the price itself, as the signed-in guest.
+export async function createBooking(formData) {
+  const stay = {
+    cabinId: Number(formData.get("cabinId")),
+    from: String(formData.get("from") ?? ""),
+    to: String(formData.get("to") ?? ""),
+    guests: Number(formData.get("guests")),
+  };
 
-  const cabin = await getCabin(bookingData.cabinId);
-  const settings = await getSettings();
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const startDate = new Date(bookingData.startDate);
-  const endDate = new Date(bookingData.endDate);
-  const numNights = Math.round((endDate - startDate) / DAY_MS);
+  // Signed out in the meantime: sign in, then come back to this same review
+  if (!user) redirect(`/login?next=${encodeURIComponent(reviewPath(stay))}`);
 
-  const numGuests = Number(formData.get("numGuests"));
-  const hasBreakfast = formData.get("hasBreakfast") === "on";
-  const maxGuests = Math.min(cabin.maxCapacity, settings.maxGuestsPerBooking);
-
-  // A day of leeway, because the server and the guest may be in different time zones
-  if (isNaN(numNights) || startDate < subDays(startOfToday(), 1))
-    return { error: "Please choose dates from today on." };
-
-  if (numNights < settings.minBookingLength)
-    return {
-      error: `Stays are at least ${settings.minBookingLength} nights.`,
-    };
-
-  if (numNights > settings.maxBookingLength)
-    return {
-      error: `Stays are at most ${settings.maxBookingLength} nights.`,
-    };
-
-  if (!Number.isInteger(numGuests) || numGuests < 1 || numGuests > maxGuests)
-    return { error: `This cabin sleeps up to ${maxGuests} guests.` };
-
-  if (await isCabinTaken(cabin.id, startDate, endDate))
-    return {
-      error: "Someone has just booked some of these nights. Please pick others.",
-    };
-
-  const prices = getBookingPrice({
-    cabin,
-    numNights,
-    numGuests,
-    hasBreakfast,
-    breakfastPrice: settings.breakfastPrice,
+  const { data, error } = await supabase.rpc("create_booking", {
+    p_cabin_id: stay.cabinId,
+    p_start_date: stay.from,
+    p_end_date: stay.to,
+    p_num_guests: stay.guests,
+    p_observations: readObservations(formData),
   });
 
-  const { data, error } = await supabaseAdmin
-    .from("bookings")
-    .insert([
-      {
-        cabinId: cabin.id,
-        guestId,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        numNights,
-        numGuests,
-        hasBreakfast,
-        ...prices,
-        observations: readObservations(formData),
-        isPaid: false,
-        status: "unconfirmed",
-      },
-    ])
-    .select("id")
-    .single();
+  if (error)
+    return {
+      error: bookingError(
+        error,
+        "Your reservation could not be saved. Please try again."
+      ),
+    };
 
-  if (error) {
-    console.error(error);
-    return { error: "Your booking could not be saved. Please try again." };
-  }
-
-  revalidatePath(`/cabins/${cabin.id}`);
+  revalidatePath(`/cabins/${stay.cabinId}`);
   revalidatePath("/account/reservations");
 
-  redirect(`/cabins/thankyou?booking=${data.id}`);
+  redirect(`/cabins/thankyou?ref=${data.reference}`);
 }
 
-// Guests can change a stay only until the hotel checks them in
+// A guest changes the number of guests or the notes, until the day before
+// arrival. update_booking checks the reservation is theirs.
 export async function updateBooking(formData) {
-  const guestId = await getGuestId();
   const bookingId = Number(formData.get("bookingId"));
 
-  const booking = await getGuestBooking(bookingId, guestId);
-
-  if (!booking) throw new Error("You are not allowed to update this booking");
-
-  if (!canStillChange(booking))
-    return { error: "This stay has started, so it can no longer be changed." };
-
-  const settings = await getSettings();
-  const numGuests = Number(formData.get("numGuests"));
-  const hasBreakfast = formData.get("hasBreakfast") === "on";
-  const maxGuests = Math.min(
-    booking.cabins.maxCapacity,
-    settings.maxGuestsPerBooking
-  );
-
-  if (!Number.isInteger(numGuests) || numGuests < 1 || numGuests > maxGuests)
-    return { error: `This cabin sleeps up to ${maxGuests} guests.` };
-
-  // More guests or breakfast changes the price, so it is worked out again
-  const prices = getBookingPrice({
-    cabin: booking.cabins,
-    numNights: booking.numNights,
-    numGuests,
-    hasBreakfast,
-    breakfastPrice: settings.breakfastPrice,
+  const { error } = await createClient().rpc("update_booking", {
+    p_booking_id: bookingId,
+    p_num_guests: Number(formData.get("numGuests")),
+    p_observations: readObservations(formData),
   });
 
-  const { error } = await supabaseAdmin
-    .from("bookings")
-    .update({
-      numGuests,
-      hasBreakfast,
-      ...prices,
-      observations: readObservations(formData),
-    })
-    .eq("id", bookingId)
-    .eq("guestId", guestId);
-
-  if (error) return { error: "Your changes could not be saved." };
+  if (error)
+    return { error: bookingError(error, "Your changes could not be saved.") };
 
   revalidatePath(`/account/reservations/edit/${bookingId}`);
   revalidatePath("/account/reservations");
@@ -215,26 +130,19 @@ export async function updateBooking(formData) {
   redirect("/account/reservations");
 }
 
-export async function deleteBooking(bookingId) {
-  const guestId = await getGuestId();
+// Cancelling keeps the reservation, marked cancelled, and frees the nights
+export async function cancelBooking(bookingId) {
+  const { data, error } = await createClient().rpc("cancel_booking", {
+    p_booking_id: bookingId,
+  });
 
-  const booking = await getGuestBooking(bookingId, guestId);
-
-  if (!booking) throw new Error("You are not allowed to cancel this booking");
-
-  if (!canStillChange(booking))
-    throw new Error("This stay has started, so it can no longer be cancelled");
-
-  const { error } = await supabaseAdmin
-    .from("bookings")
-    .delete()
-    .eq("id", bookingId)
-    .eq("guestId", guestId);
-
-  if (error) throw new Error("Booking could not be cancelled");
+  if (error)
+    throw new Error(
+      bookingError(error, "Your reservation could not be cancelled.")
+    );
 
   revalidatePath("/account/reservations");
-  revalidatePath(`/cabins/${booking.cabinId}`);
+  revalidatePath(`/cabins/${data.cabinId}`);
 }
 
 /////////////

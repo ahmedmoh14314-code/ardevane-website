@@ -1,29 +1,24 @@
-import { getUser } from "../_lib/auth";
 import { getBookedDatesByCabinId, getSettings } from "../_lib/data-service";
 import DateSelector from "./DateSelector";
-import LoginMessage from "./LoginMessage";
-import ReservationForm from "./ReservationForm";
+import ReservationSummary from "./ReservationSummary";
 
+// Dates and guests, open to everyone. Signing in only comes at the very
+// end, when the guest confirms on the review page.
 async function Reservation({ cabin }) {
-  const [settings, bookedDates, user] = await Promise.all([
+  const [settings, takenNights] = await Promise.all([
     getSettings(),
     getBookedDatesByCabinId(cabin.id),
-    getUser(),
   ]);
 
   return (
     <div className="card grid overflow-hidden lg:grid-cols-[3fr_2fr]">
       <DateSelector
         settings={settings}
-        bookedDates={bookedDates}
+        takenNights={takenNights}
         cabin={cabin}
       />
 
-      {user ? (
-        <ReservationForm cabin={cabin} settings={settings} user={user} />
-      ) : (
-        <LoginMessage next={`/cabins/${cabin.id}#reserve`} />
-      )}
+      <ReservationSummary cabin={cabin} settings={settings} />
     </div>
   );
 }
