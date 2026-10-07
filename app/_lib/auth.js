@@ -1,48 +1,35 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import { createGuest, getGuest } from "./data-service";
+import "server-only";
+import { cache } from "react";
+import { createClient } from "./supabase/server";
+import { toGuestUser } from "./users";
 
-// Guests sign in with Google through NextAuth, not Supabase Auth. Supabase
-// Auth accounts are hotel staff, and every staff account can open the
-// dashboard, so guests must never be given one.
-const authConfig = {
-  providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-  ],
-  callbacks: {
-    authorized({ auth }) {
-      return !!auth?.user;
-    },
-    async signIn({ user }) {
-      try {
-        const existingGuest = await getGuest(user.email);
+// Who is signed in, or null. cache() makes it one check per request, however
+// many components ask.
+export const getUser = cache(async function () {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-        // A first visit creates the guest the dashboard will see
-        if (!existingGuest)
-          await createGuest({ email: user.email, fullName: user.name });
+  return user ? toGuestUser(user) : null;
+});
 
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    async session({ session }) {
-      const guest = await getGuest(session.user.email);
-      session.user.guestId = guest?.id ?? null;
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
-};
+// The guest row that belongs to the signed-in account. The database creates
+// it on the first visit, or links the guest the hotel already knew by email.
+export const getGuest = cache(async function () {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-export const {
-  auth,
-  signIn,
-  signOut,
-  handlers: { GET, POST },
-} = NextAuth(authConfig);
+  if (!user) return null;
+
+  const { data, error } = await supabase.rpc("ensure_guest_profile");
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data;
+});

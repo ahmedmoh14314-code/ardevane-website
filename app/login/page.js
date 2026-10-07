@@ -1,52 +1,51 @@
-import Image from "next/image";
-import hero from "@/public/img/hero.jpg";
+import Link from "next/link";
+import AuthCard, { Divider } from "../_components/AuthCard";
 import SignInButton from "../_components/SignInButton";
+import EmailSignInForm from "../_components/EmailSignInForm";
+import FormError from "../_components/FormError";
+import { safeNextPath } from "../_lib/users";
 
 export const metadata = {
   title: "Sign in",
 };
 
-// Where to go after signing in: ?next= from our own links, or ?callbackUrl=
-// when middleware.js sent a signed-out guest here from a guest area page
-function getNextPage({ next, callbackUrl }) {
-  if (next) return next;
-
-  try {
-    const url = new URL(callbackUrl);
-    return url.pathname + url.search;
-  } catch {
-    return "/account";
-  }
-}
+const errors = {
+  link: "That link didn't work here. It may have expired or been opened in another browser. Please sign in.",
+  google:
+    "Google sign in isn't available right now. Please try again, or use your email.",
+};
 
 export default function Page({ searchParams }) {
+  const next = safeNextPath(searchParams?.next);
+  const error = errors[searchParams?.error];
+
   return (
-    <div className="relative isolate flex min-h-[80vh] items-center justify-center px-4 py-16">
-      <Image
-        src={hero}
-        alt=""
-        fill
-        placeholder="blur"
-        className="-z-10 object-cover"
-      />
-      <div className="absolute inset-0 -z-10 bg-brand-950/40" />
+    <AuthCard
+      eyebrow="Guest area"
+      title="Welcome back"
+      intro="Sign in to reserve a cabin and to see or change your stays."
+    >
+      {error && (
+        <div className="mb-6">
+          <FormError message={error} />
+        </div>
+      )}
 
-      <div className="w-full max-w-md animate-rise rounded-3xl bg-white/90 p-10 text-center shadow-lift backdrop-blur">
-        <p className="eyebrow mb-3">Guest area</p>
-        <h1 className="mb-3 font-display text-4xl text-brand-900">
-          Welcome to Ardevane
-        </h1>
-        <p className="mb-8 text-ink-600">
-          Sign in to reserve a cabin and to see or change your stays.
-        </p>
+      <SignInButton next={next} />
 
-        <SignInButton next={getNextPage(searchParams ?? {})} />
+      <Divider />
 
-        <p className="mt-6 text-xs text-ink-500">
-          We only use your name and email address, to keep your reservations
-          together.
-        </p>
-      </div>
-    </div>
+      <EmailSignInForm next={next} />
+
+      <p className="mt-6 text-sm text-ink-600">
+        New to Ardevane?{" "}
+        <Link
+          href={`/signup?next=${encodeURIComponent(next)}`}
+          className="font-medium text-brand-700 underline decoration-brand-200 underline-offset-4 hover:decoration-brand-600"
+        >
+          Create an account
+        </Link>
+      </p>
+    </AuthCard>
   );
 }

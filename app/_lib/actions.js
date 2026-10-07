@@ -1,11 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { endOfDay, isPast, startOfToday, subDays } from "date-fns";
 
-import { auth, signIn, signOut } from "./auth";
-import { supabase } from "./supabase";
+import { getGuest } from "./auth";
+import { createClient } from "./supabase/server";
+import { supabaseAdmin } from "./supabase/admin";
+import { safeNextPath } from "./users";
 import {
   getCabin,
   getGuestBooking,
@@ -16,12 +19,23 @@ import { getBookingPrice } from "./pricing";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Every action starts here: no signed-in guest, no access
+// Every booking action starts here: no signed-in guest, no access. The guest
+// comes from the session cookie, never from anything the browser sends.
 async function getGuestId() {
-  const session = await auth();
-  if (!session?.user?.guestId) throw new Error("You must be logged in");
+  const guest = await getGuest();
+  if (!guest) throw new Error("You need to be signed in");
 
-  return session.user.guestId;
+  return guest.id;
+}
+
+// The address of this site, for links that come back to it
+function getOrigin() {
+  const requestHeaders = headers();
+
+  return (
+    requestHeaders.get("origin") ??
+    `${requestHeaders.get("x-forwarded-proto") ?? "http"}://${requestHeaders.get("host")}`
+  );
 }
 
 // Changes are open until the arrival day is over, or until the guest is checked in
@@ -41,27 +55,28 @@ function readObservations(formData) {
 /////////////
 // PROFILE
 
+// Guests can't write to the guests table. update_guest_profile() changes only
+// their own row, and checks every value on the way in.
 export async function updateGuest(formData) {
-  const guestId = await getGuestId();
-
   const nationalID = String(formData.get("nationalID") ?? "").trim();
   const [nationality, countryFlag] = String(
     formData.get("nationality") ?? ""
   ).split("%");
 
-  if (!/^[a-zA-Z0-9]{6,12}$/.test(nationalID))
-    return { error: "National ID must be 6 to 12 letters or numbers." };
+  const { error } = await createClient().rpc("update_guest_profile", {
+    p_nationality: nationality,
+    p_country_flag: countryFlag ?? null,
+    p_national_id: nationalID,
+  });
 
-  // The flag must come from our own country list, not any address at all
-  if (!nationality || !countryFlag?.startsWith("https://flagcdn.com/"))
-    return { error: "Please choose your country from the list." };
-
-  const { error } = await supabase
-    .from("guests")
-    .update({ nationality, countryFlag, nationalID })
-    .eq("id", guestId);
-
-  if (error) return { error: "Your profile could not be saved." };
+  // 22023 = a value the database refused; its message says which one
+  if (error)
+    return {
+      error:
+        error.code === "22023"
+          ? `${error.message}.`
+          : "Your profile could not be saved.",
+    };
 
   revalidatePath("/account/profile");
 
@@ -118,7 +133,7 @@ export async function createBooking(bookingData, formData) {
     breakfastPrice: settings.breakfastPrice,
   });
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("bookings")
     .insert([
       {
@@ -181,7 +196,7 @@ export async function updateBooking(formData) {
     breakfastPrice: settings.breakfastPrice,
   });
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("bookings")
     .update({
       numGuests,
@@ -210,7 +225,7 @@ export async function deleteBooking(bookingId) {
   if (!canStillChange(booking))
     throw new Error("This stay has started, so it can no longer be cancelled");
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("bookings")
     .delete()
     .eq("id", bookingId)
@@ -223,17 +238,107 @@ export async function deleteBooking(bookingId) {
 }
 
 /////////////
-// SIGN IN AND OUT
+// SIGN IN, SIGN UP AND OUT
 
-export async function signInAction(formData) {
-  const next = String(formData.get("next") ?? "");
+// Google signs the guest in and sends them to /auth/callback, which brings
+// them back to the page they were on
+export async function signInWithGoogle(formData) {
+  const next = safeNextPath(formData.get("next"));
 
-  // Only our own pages, so the link can't send guests to another site
-  const isOwnPage = next.startsWith("/") && !next.startsWith("//");
+  const { data, error } = await createClient().auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${getOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
+  });
 
-  await signIn("google", { redirectTo: isOwnPage ? next : "/account" });
+  if (error) {
+    console.error(error);
+    redirect(`/login?error=google&next=${encodeURIComponent(next)}`);
+  }
+
+  redirect(data.url);
+}
+
+export async function signInWithEmail(formData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const next = safeNextPath(formData.get("next"));
+
+  if (!email || !password)
+    return { error: "Please enter your email and password." };
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error)
+    return {
+      error:
+        error.code === "email_not_confirmed"
+          ? "Please confirm your email address first. The link is in your inbox."
+          : "Email or password is incorrect.",
+    };
+
+  const { error: profileError } = await supabase.rpc("ensure_guest_profile");
+
+  if (profileError)
+    return { error: "Your guest profile could not be opened. Please try again." };
+
+  redirect(next);
+}
+
+export async function signUpWithEmail(formData) {
+  const fullName = String(formData.get("fullName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const next = safeNextPath(formData.get("next"));
+
+  if (fullName.length < 2) return { error: "Please enter your name." };
+
+  if (!/\S+@\S+\.\S+/.test(email))
+    return { error: "Please enter a valid email address." };
+
+  if (password.length < 8)
+    return { error: "Your password needs at least 8 characters." };
+
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: fullName },
+      emailRedirectTo: `${getOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
+  });
+
+  if (error) {
+    console.error(error);
+
+    return {
+      error:
+        error.status === 429
+          ? "Too many attempts. Please wait a minute and try again."
+          : error.code === "weak_password"
+            ? error.message
+            : "Your account could not be created. Please try again.",
+    };
+  }
+
+  // Supabase asks new accounts to confirm their email first, so there is no
+  // session yet. (It says the same for an address that is already
+  // registered, without revealing which.)
+  if (!data.session)
+    return {
+      success: `Check your inbox: we've sent a link to ${email}. Open it to confirm your address and you're in.`,
+    };
+
+  await supabase.rpc("ensure_guest_profile");
+
+  redirect(next);
 }
 
 export async function signOutAction() {
-  await signOut({ redirectTo: "/" });
+  await createClient().auth.signOut();
+
+  redirect("/");
 }

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { eachDayOfInterval, startOfToday } from "date-fns";
-import { supabase } from "./supabase";
+import { supabase } from "./supabase/public";
+import { supabaseAdmin } from "./supabase/admin";
+import { createClient } from "./supabase/server";
 
 /////////////
 // CABINS
@@ -61,7 +63,7 @@ export async function getCabinImages(cabinId) {
 export async function getBookedDatesByCabinId(cabinId) {
   const today = startOfToday().toISOString();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("bookings")
     .select("startDate, endDate")
     .eq("cabinId", cabinId)
@@ -86,7 +88,7 @@ export async function getBookedDatesByCabinId(cabinId) {
 // True when another stay in this cabin overlaps these dates. A guest may
 // arrive on the day the last one leaves.
 export async function isCabinTaken(cabinId, startDate, endDate) {
-  const { count, error } = await supabase
+  const { count, error } = await supabaseAdmin
     .from("bookings")
     .select("id", { count: "exact", head: true })
     .eq("cabinId", cabinId)
@@ -103,7 +105,7 @@ export async function isCabinTaken(cabinId, startDate, endDate) {
 }
 
 export async function getBookings(guestId) {
-  const { data, error } = await supabase
+  const { data, error } = await createClient()
     .from("bookings")
     .select(
       "id, created_at, startDate, endDate, numNights, numGuests, totalPrice, extrasPrice, hasBreakfast, isPaid, status, cabinId, cabins(name, image)"
@@ -121,7 +123,7 @@ export async function getBookings(guestId) {
 
 // A booking only comes back if it belongs to this guest
 export async function getGuestBooking(id, guestId) {
-  const { data, error } = await supabase
+  const { data, error } = await createClient()
     .from("bookings")
     .select("*, cabins(name, image, maxCapacity, regularPrice, discount)")
     .eq("id", id)
@@ -131,36 +133,6 @@ export async function getGuestBooking(id, guestId) {
   if (error) {
     console.error(error);
     throw new Error("Booking could not get loaded");
-  }
-
-  return data;
-}
-
-/////////////
-// GUESTS
-
-// Guests are uniquely identified by their email address
-export async function getGuest(email) {
-  const { data } = await supabase
-    .from("guests")
-    .select("*")
-    .eq("email", email)
-    .maybeSingle();
-
-  // No error here! We handle the possibility of no guest in the sign in callback
-  return data;
-}
-
-export async function createGuest(newGuest) {
-  const { data, error } = await supabase
-    .from("guests")
-    .insert([newGuest])
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Guest could not be created");
   }
 
   return data;

@@ -19,14 +19,15 @@ The guest website of a mountain cabin resort. Guests browse the cabins, pick the
 
 ## Built with
 
-Next.js 14 (App Router, Server Components, Server Actions) · React · Tailwind CSS · NextAuth (Google) · Supabase (Postgres, Storage) · date-fns · react-day-picker
+Next.js 14 (App Router, Server Components, Server Actions) · React · Tailwind CSS · Supabase (Postgres, Auth, Storage) · date-fns · react-day-picker · Vitest
 
 ## Under the hood
 
-- The database stays locked to hotel staff. The website reads and writes only from the server, with a secret key that never reaches the browser, and every action checks that the booking belongs to the signed-in guest.
+- Guests and staff share one Supabase Auth, but being signed in gives no staff rights: staff are the accounts on the dashboard's team list. A guest reads their own profile and bookings as themselves, so the database's access rules decide what they see.
 - The browser only sends a cabin and two dates. Nights, prices, guest limits and free dates are all checked again on the server before a booking is saved, so a price can't be changed from the browser and two guests can't book the same night.
 - One pricing module is shared by the price the guest sees and the price the server saves.
-- Guests sign in through NextAuth, not Supabase Auth, because every Supabase Auth account is a member of staff.
+- Guests sign up with their name, email and password, or continue with Google. The first sign in creates their guest profile, or takes over the one the hotel already had for their email after a phone booking.
+- Saving a booking still uses the secret key on the server, after checking who is signed in. It moves into database functions in the next step, and the key goes with it.
 - Cabin pages are generated at build time and refreshed every hour.
 
 ## Running it locally
@@ -36,12 +37,11 @@ npm install
 npm run dev
 ```
 
-It needs a `.env.local` file:
+Copy `.env.example` to `.env.local` and fill it in from your Supabase project. The database itself (tables, access rules) is set up from the [Ardevane Operations](https://github.com/ahmedmoh14314-code/ardevane-operations) repository, in `supabase/`.
 
-```
-SUPABASE_URL=
-SUPABASE_KEY=          # the secret (service role) key, server only
-AUTH_SECRET=
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
-```
+In the Supabase dashboard:
+
+- **Authentication > URL Configuration > Redirect URLs:** add `http://localhost:3000/**` (and your live address).
+- **Authentication > Sign In / Providers > Google:** turn it on with your Google OAuth client. In Google Cloud, that client's redirect URI is the callback URL Supabase shows there.
+
+Tests: `npm test`.

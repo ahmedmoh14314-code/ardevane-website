@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import EditReservationForm from "@/app/_components/EditReservationForm";
-import { auth } from "@/app/_lib/auth";
+import { getGuest } from "@/app/_lib/auth";
 import { getGuestBooking, getSettings } from "@/app/_lib/data-service";
 
 export const metadata = {
@@ -10,11 +10,11 @@ export const metadata = {
 };
 
 export default async function Page({ params }) {
-  const session = await auth();
+  const guest = await getGuest();
 
   // Somebody else's booking number simply does not exist for this guest
   const [booking, settings] = await Promise.all([
-    getGuestBooking(params.bookingId, session.user.guestId),
+    getGuestBooking(params.bookingId, guest.id),
     getSettings(),
   ]);
 

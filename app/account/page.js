@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { format, isFuture, isToday } from "date-fns";
-import { auth } from "../_lib/auth";
-import { getBookings, getGuest } from "../_lib/data-service";
+import { getGuest, getUser } from "../_lib/auth";
+import { getBookings } from "../_lib/data-service";
 import { formatCurrency } from "../_lib/pricing";
 import StatusTag from "../_components/StatusTag";
 
@@ -11,13 +11,10 @@ export const metadata = {
 };
 
 export default async function Page() {
-  const session = await auth();
-  const [bookings, guest] = await Promise.all([
-    getBookings(session.user.guestId),
-    getGuest(session.user.email),
-  ]);
+  const [user, guest] = await Promise.all([getUser(), getGuest()]);
+  const bookings = await getBookings(guest.id);
 
-  const firstName = session.user.name.split(" ").at(0);
+  const firstName = user.name.split(" ").at(0);
 
   // The stay that matters most: the one happening now, or the next one
   const nextStay = bookings.find(
