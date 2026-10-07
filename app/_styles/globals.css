@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-variant-numeric: lining-nums;
+  }
+
+  ::selection {
+    background-color: theme("colors.brand.100");
+  }
+
+  :focus-visible {
+    outline: 2px solid theme("colors.brand.600");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Buttons: one look for every call to action on the site */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-medium transition-all active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-soft hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply btn border border-cream-200 bg-white text-ink-700 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700;
+  }
+
+  .btn-gold {
+    @apply btn bg-gold-300 text-brand-900 shadow-soft hover:bg-gold-200;
+  }
+
+  /* Form fields */
+  .field {
+    @apply w-full rounded-xl border border-cream-200 bg-white px-4 py-3 text-ink-800 shadow-sm transition-colors placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-cream-100 disabled:text-ink-500;
+  }
+
+  .label {
+    @apply mb-2 block text-sm font-medium text-ink-700;
+  }
+
+  /* The width and side gutters every page shares */
+  .page {
+    @apply mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 sm:py-14;
+  }
+
+  .page-title {
+    @apply font-display text-4xl font-medium text-brand-900 sm:text-5xl;
+  }
+
+  .card {
+    @apply rounded-2xl border border-cream-200 bg-white shadow-soft;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-gold-600;
+  }
+
+  .spinner {
+    margin: 4rem auto 1.6rem;
+    width: 48px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 4px solid theme("colors.brand.100");
+    border-right-color: theme("colors.brand.600");
+    animation: rotate 1s infinite linear;
+  }
+
+  .spinner-mini {
+    margin: 0;
+    width: 18px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: rotate 1s infinite linear;
+  }
+
+  @keyframes rotate {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+}
+
+/* Nothing slides or scales when "Show animations" is off, things still fade */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation-name: fade;
+  }
+
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* Date picker, in the brand colours */
+.rdp {
+  --rdp-cell-size: 40px !important;
+  --rdp-accent-color: theme("colors.brand.600") !important;
+  --rdp-background-color: theme("colors.brand.50") !important;
+  --rdp-outline: 2px solid theme("colors.brand.500") !important;
+  margin: 0 !important;
+}
+
+.rdp-day_selected:not(.rdp-day_range_start):not(.rdp-day_range_end) {
+  background-color: theme("colors.brand.100") !important;
+  color: theme("colors.brand.900") !important;
+}
+
+.rdp-day_disabled {
+  opacity: 0.3 !important;
+}
+
+.rdp-caption_label,
+.rdp-dropdown {
+  font-family: var(--font-display);
+}
+
+.rdp-months {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}

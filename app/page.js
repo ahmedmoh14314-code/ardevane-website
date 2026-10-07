@@ -1,101 +1,114 @@
 import Image from "next/image";
+import Link from "next/link";
+import {
+  FireIcon,
+  HomeModernIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 
-export default function Home() {
+import hero from "@/public/img/hero.jpg";
+import CabinCard from "./_components/CabinCard";
+import { getCabins } from "./_lib/data-service";
+
+export const revalidate = 3600;
+
+const highlights = [
+  {
+    icon: HomeModernIcon,
+    title: "A cabin of your own",
+    text: "Wooden cabins spread between the pines, each with its own deck and no neighbours in sight.",
+  },
+  {
+    icon: FireIcon,
+    title: "Evenings by the fire",
+    text: "Fire pits, hot tubs and long views over the lake as the sun goes down behind the peaks.",
+  },
+  {
+    icon: SparklesIcon,
+    title: "Looked after, quietly",
+    text: "Breakfast brought to your cabin if you want it, and a team that knows every cabin by name.",
+  },
+];
+
+export default async function Page() {
+  const cabins = await getCabins();
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <>
+      <section className="relative isolate flex min-h-[78vh] items-end overflow-hidden">
         <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
+          src={hero}
+          alt="A cabin terrace with a fire pit, looking over the lake to the mountains"
+          fill
           priority
+          placeholder="blur"
+          quality={85}
+          className="-z-10 object-cover"
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-brand-950/85 via-brand-950/35 to-transparent" />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="mx-auto w-full max-w-7xl animate-rise px-4 pb-16 sm:px-8 sm:pb-24">
+          <p className="eyebrow mb-4 text-gold-300">Mountain cabins by the lake</p>
+          <h1 className="max-w-3xl font-display text-5xl font-medium leading-tight text-white sm:text-7xl">
+            Wake up where the forest meets the water.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-cream-100">
+            {cabins.length} private cabins, open all year. Choose your dates,
+            reserve in a minute and pay when you arrive.
+          </p>
+
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link href="/cabins" className="btn-gold px-8 py-4 text-lg">
+              Find your cabin
+            </Link>
+            <Link
+              href="/about"
+              className="btn border border-white/40 px-8 py-4 text-lg text-white hover:bg-white/10"
+            >
+              About Ardevane
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      <section className="page">
+        <ul className="grid gap-6 md:grid-cols-3">
+          {highlights.map(({ icon: Icon, title, text }, i) => (
+            <li
+              key={title}
+              className="card animate-rise p-7"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                <Icon className="h-6 w-6" />
+              </span>
+              <h2 className="mb-2 font-display text-2xl text-brand-900">
+                {title}
+              </h2>
+              <p className="leading-relaxed text-ink-600">{text}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="page pt-0 sm:pt-0">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow mb-2">Our cabins</p>
+            <h2 className="page-title">Pick your view</h2>
+          </div>
+
+          <Link href="/cabins" className="btn-secondary">
+            See all {cabins.length} cabins &rarr;
+          </Link>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {cabins.slice(0, 3).map((cabin) => (
+            <CabinCard cabin={cabin} key={cabin.id} />
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

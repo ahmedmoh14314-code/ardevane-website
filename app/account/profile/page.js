@@ -1,0 +1,35 @@
+import SelectCountry from "@/app/_components/SelectCountry";
+import UpdateProfileForm from "@/app/_components/UpdateProfileForm";
+import { auth } from "@/app/_lib/auth";
+import { getGuest } from "@/app/_lib/data-service";
+
+export const metadata = {
+  title: "Guest profile",
+};
+
+export default async function Page() {
+  const session = await auth();
+  const guest = await getGuest(session.user.email);
+
+  return (
+    <div>
+      <header className="mb-8">
+        <p className="eyebrow mb-2">Guest area</p>
+        <h1 className="page-title mb-3">Your guest profile</h1>
+        <p className="max-w-2xl text-ink-600">
+          The front desk needs these at check-in. Fill them in now, and
+          you&apos;ll go straight to your cabin when you arrive.
+        </p>
+      </header>
+
+      <UpdateProfileForm guest={guest}>
+        <SelectCountry
+          name="nationality"
+          id="nationality"
+          className="field"
+          defaultCountry={guest.nationality}
+        />
+      </UpdateProfileForm>
+    </div>
+  );
+}
