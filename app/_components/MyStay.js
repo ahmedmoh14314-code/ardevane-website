@@ -2,13 +2,15 @@ import Image from "next/image";
 import { format } from "date-fns";
 import StatusTag from "./StatusTag";
 import StayFolio from "./StayFolio";
+import StayServices from "./StayServices";
+import StayRequests from "./StayRequests";
 import { stayDay } from "../_lib/account";
 import { formatCurrency } from "../_lib/pricing";
 import { toDay } from "../_lib/stay";
 
 // The account while the guest is checked in: where they are staying, which
 // day of the stay it is, and what the stay has cost so far
-function MyStay({ guestName, booking, charges, today }) {
+function MyStay({ guestName, booking, charges, requests, menu, today }) {
   const {
     reference,
     startDate,
@@ -84,6 +86,10 @@ function MyStay({ guestName, booking, charges, today }) {
           <p className="text-sm text-ink-400">Booking {reference}</p>
         </div>
       </section>
+
+      <StayServices menu={menu} />
+
+      <StayRequests requests={requests} />
 
       <StayFolio id="charges" folio={folio} charges={charges} />
     </div>

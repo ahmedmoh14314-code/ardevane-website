@@ -146,6 +146,40 @@ export async function cancelBooking(bookingId) {
 }
 
 /////////////
+// STAY REQUESTS
+
+// A checked-in guest asks for something. The database finds their stay,
+// checks it is checked in, and prices any breakfast itself.
+export async function createStayRequest({
+  type,
+  title,
+  note,
+  priority,
+  requestedFor,
+  items,
+}) {
+  const { error } = await createClient().rpc("create_stay_request", {
+    p_type: type,
+    p_title: title ?? null,
+    p_note: note ?? null,
+    p_priority: priority ?? "normal",
+    p_requested_for: requestedFor || null,
+    p_items: items ?? null,
+  });
+
+  if (error)
+    return {
+      error:
+        error.code === "22023"
+          ? asSentence(error.message)
+          : "That didn't go through. Please try again.",
+    };
+
+  revalidatePath("/account");
+  return { ok: true };
+}
+
+/////////////
 // SIGN IN, SIGN UP AND OUT
 
 // Google signs the guest in and sends them to /auth/callback, which brings

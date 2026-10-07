@@ -65,7 +65,7 @@ function StayFolio({ folio, charges = [], id }) {
 
       <p className="mt-6 text-sm text-ink-500">
         {remaining > 0
-          ? "Pay at the front desk, any time before you leave. Charges and payments are added by the front desk."
+          ? "Still to pay at the front desk. Charges and payments are added by the front desk."
           : "Nothing left to pay. Charges and payments are added by the front desk."}
       </p>
     </section>

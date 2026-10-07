@@ -153,6 +153,42 @@ export async function getStayCharges(bookingId) {
   return data;
 }
 
+// What the guest asked for during a stay, newest first, with the dishes of
+// a breakfast order. Guests only ever see their own.
+export async function getStayRequests(bookingId) {
+  const { data, error } = await createClient()
+    .from("requests")
+    .select(
+      "id, created_at, type, status, title, note, priority, requestedFor, request_items(name, quantity, unitPrice)"
+    )
+    .eq("bookingId", bookingId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    throw new Error("Requests could not be loaded");
+  }
+
+  return data;
+}
+
+// The breakfast menu, for signed-in guests
+export async function getMenu() {
+  const { data, error } = await createClient()
+    .from("services")
+    .select("id, name, price")
+    .eq("category", "menu")
+    .eq("isActive", true)
+    .order("price", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    throw new Error("The menu could not be loaded");
+  }
+
+  return data;
+}
+
 // "Today" where the cabins are, so Day 2 of 5 is right wherever the
 // server runs
 export async function getPropertyToday() {

@@ -3,8 +3,13 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import StatusTag from "@/app/_components/StatusTag";
 import StayFolio from "@/app/_components/StayFolio";
+import StayRequests from "@/app/_components/StayRequests";
 import { getGuest } from "@/app/_lib/auth";
-import { getBookings, getStayCharges } from "@/app/_lib/data-service";
+import {
+  getBookings,
+  getStayCharges,
+  getStayRequests,
+} from "@/app/_lib/data-service";
 import { toDay } from "@/app/_lib/stay";
 
 export const metadata = {
@@ -20,7 +25,10 @@ export default async function Page({ params }) {
   const booking = bookings.find((item) => String(item.id) === params.bookingId);
   if (!booking) notFound();
 
-  const charges = await getStayCharges(booking.id);
+  const [charges, requests] = await Promise.all([
+    getStayCharges(booking.id),
+    getStayRequests(booking.id),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -46,6 +54,9 @@ export default async function Page({ params }) {
       </header>
 
       <StayFolio folio={booking.folio} charges={charges} />
+
+      {/* What was asked for during the stay, for the record */}
+      <StayRequests requests={requests} title="Requests during this stay" />
     </div>
   );
 }

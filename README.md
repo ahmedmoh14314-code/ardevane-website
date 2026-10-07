@@ -8,7 +8,7 @@ The guest website of a mountain cabin resort. Guests browse the cabins, pick the
 - **Pick dates on a calendar** that already greys out taken nights and follows the hotel's rules for the shortest and longest stay.
 - **Reserve in one step**, with a live price breakdown. Nothing is paid online: the stay is paid at the cabin.
 - **Sign in with Google** and come straight back to the cabin, with the picked dates still there.
-- **Manage stays** in a guest area that follows the stay: a way to book when nothing is planned; the next reservation, with edit and cancel until the day before arrival; and once checked in, **My Stay** — the cabin, "Day 2 of 5", and the folio (accommodation, extra charges, paid and still to pay), read-only because only the front desk adds charges and payments. Finished stays move to past stays, each with its final folio.
+- **Manage stays** in a guest area that follows the stay: a way to book when nothing is planned; the next reservation, with edit and cancel until the day before arrival; and once checked in, **My Stay** — the cabin, "Day 2 of 5", and the folio (accommodation, extra charges, paid and still to pay), read-only because only the front desk adds charges and payments. While checked in, the guest can order breakfast from a small menu (for a time they pick), ask for housekeeping, ask the front desk for help or report something that isn't working, and follow each request as the staff move it on. A delivered breakfast appears on the folio. Finished stays move to past stays, each with its final folio and the requests made during it.
 - **Change or cancel** a stay until the arrival day, and fill in nationality and ID before arriving, so check-in is quicker.
 
 ## How it works with the dashboard

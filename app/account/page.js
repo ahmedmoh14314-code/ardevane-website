@@ -2,8 +2,10 @@ import Link from "next/link";
 import { getGuest, getUser } from "../_lib/auth";
 import {
   getBookings,
+  getMenu,
   getPropertyToday,
   getStayCharges,
+  getStayRequests,
 } from "../_lib/data-service";
 import { sortBookings } from "../_lib/account";
 import MyStay from "../_components/MyStay";
@@ -25,7 +27,14 @@ export default async function Page() {
   const bookings = await getBookings(guest.id);
   const { state, stay, upcoming, history } = sortBookings(bookings, today);
 
-  const charges = stay ? await getStayCharges(stay.id) : [];
+  // While checked in: the stay's charges, its requests and the menu
+  const [charges, requests, menu] = stay
+    ? await Promise.all([
+        getStayCharges(stay.id),
+        getStayRequests(stay.id),
+        getMenu(),
+      ])
+    : [[], [], []];
   const firstName = user.name.split(" ").at(0);
   const isProfileDone = Boolean(guest?.nationality && guest?.nationalID);
 
@@ -45,6 +54,8 @@ export default async function Page() {
           guestName={user.name}
           booking={stay}
           charges={charges}
+          requests={requests}
+          menu={menu}
           today={today}
         />
       )}
