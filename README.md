@@ -6,16 +6,16 @@ The guest website of a mountain cabin resort. Guests browse the cabins, pick the
 
 - **Browse cabins** by size, each with its photo gallery, nightly price and any discount.
 - **Pick dates on a calendar** that already greys out taken nights and follows the hotel's rules for the shortest and longest stay.
-- **Reserve in one step**, with optional breakfast and a live price breakdown. Nothing is paid online.
+- **Reserve in one step**, with a live price breakdown. Nothing is paid online: the stay is paid at the cabin.
 - **Sign in with Google** and come straight back to the cabin, with the picked dates still there.
-- **Manage stays** in a guest area: upcoming and past stays, the same status the front desk sees, paid or due, and the booking number to show on arrival.
+- **Manage stays** in a guest area: upcoming and past stays, the same status the front desk sees, and the booking number to show on arrival.
 - **Change or cancel** a stay until the arrival day, and fill in nationality and ID before arriving, so check-in is quicker.
 
 ## How it works with the dashboard
 
 - Cabins archived in the dashboard disappear from the website.
-- Breakfast price, stay lengths and the guest limit come from the dashboard's Settings, so a change there changes the website at once.
-- When the front desk checks a guest in or marks a booking as paid, the guest sees it in their reservations, and the stay can no longer be changed.
+- Stay lengths and the guest limit come from the dashboard's Settings, so a change there changes the website at once.
+- When the front desk checks a guest in, the guest sees it in their reservations, and the stay can no longer be changed.
 
 ## Built with
 

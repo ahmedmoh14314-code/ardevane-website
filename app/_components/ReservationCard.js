@@ -21,7 +21,6 @@ function ReservationCard({ booking, onCancel }) {
     numNights,
     totalPrice,
     numGuests,
-    isPaid,
     status,
     created_at,
     cabins: { name, image },
@@ -51,10 +50,7 @@ function ReservationCard({ booking, onCancel }) {
             {numNights} nights in Cabin {name}
           </h3>
 
-          <div className="flex gap-2">
-            <StatusTag status={status} />
-            {!isClosed && <StatusTag status={isPaid ? "paid" : "due"} />}
-          </div>
+          <StatusTag status={status} />
         </div>
 
         <p className="text-ink-600">

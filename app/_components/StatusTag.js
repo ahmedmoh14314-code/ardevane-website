@@ -9,8 +9,6 @@ const statuses = {
   },
   cancelled: { label: "Cancelled", className: "bg-[#f8e2da] text-[#9b3b23]" },
   no_show: { label: "No-show", className: "bg-[#f1e5d9] text-[#6b4426]" },
-  paid: { label: "Paid", className: "bg-[#e2efe6] text-[#1d5a3d]" },
-  due: { label: "Pay at the cabin", className: "bg-[#f8ecd2] text-[#8a5a12]" },
 };
 
 function StatusTag({ status }) {

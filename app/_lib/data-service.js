@@ -98,7 +98,7 @@ export async function getBookings(guestId) {
   const { data, error } = await createClient()
     .from("bookings")
     .select(
-      "id, reference, created_at, startDate, endDate, numNights, numGuests, totalPrice, isPaid, status, cancelledAt, cabinId, cabins(name, image)"
+      "id, reference, created_at, startDate, endDate, numNights, numGuests, totalPrice, status, cancelledAt, cabinId, cabins(name, image)"
     )
     .eq("guestId", guestId)
     .order("startDate");
