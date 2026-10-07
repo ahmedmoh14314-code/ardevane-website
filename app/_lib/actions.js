@@ -314,6 +314,14 @@ export async function signUpWithEmail(formData) {
   if (error) {
     console.error(error);
 
+    // Without its own email service, Supabase only sends confirmation
+    // emails to the project's team, so other addresses are refused
+    if (error.code === "email_address_not_authorized")
+      return {
+        error:
+          "We can't send a confirmation email to this address yet. Please continue with Google for now.",
+      };
+
     return {
       error:
         error.status === 429
