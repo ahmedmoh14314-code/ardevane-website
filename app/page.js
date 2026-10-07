@@ -46,6 +46,8 @@ export default async function Page() {
           className="-z-10 object-cover"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-brand-950/85 via-brand-950/35 to-transparent" />
+        {/* A soft shade on the left keeps the text readable over the bright sky */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-950/55 via-brand-950/15 to-transparent" />
 
         <div className="mx-auto w-full max-w-7xl animate-rise px-4 pb-16 sm:px-8 sm:pb-24">
           <p className="eyebrow mb-4 text-gold-300">Mountain cabins by the lake</p>
