@@ -96,7 +96,9 @@ export default async function Page() {
           </div>
         </div>
 
-        <div className="mx-auto -mt-10 max-w-5xl px-5 sm:px-8 md:-mt-20">
+        {/* Pulled up over the photo, so it has to sit above it, or the
+            photo's box takes the taps meant for the fields */}
+        <div className="relative z-10 mx-auto -mt-10 max-w-5xl px-5 sm:px-8 md:-mt-20">
           <HeroSearch />
         </div>
       </section>
