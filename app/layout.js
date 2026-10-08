@@ -62,6 +62,17 @@ export const metadata = {
   },
   description:
     "Private wooden cabins between the pines and the lake, with mountain views from every deck. Book your stay at Ardevane.",
+  metadataBase: new URL("https://ardevane.netlify.app"),
+  openGraph: {
+    title: "Ardevane · Cabin resort booking and operations",
+    description:
+      "Book a mountain cabin, manage your reservation and use My Stay during your visit.",
+    url: "/",
+    siteName: "Ardevane",
+    images: [{ url: "/og.jpg", width: 1200, height: 628, alt: "Ardevane guest website and operations dashboard" }],
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", images: ["/og.jpg"] },
 };
 
 export default function RootLayout({ children }) {
