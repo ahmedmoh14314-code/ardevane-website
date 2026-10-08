@@ -23,7 +23,7 @@ function UpdateProfileForm({ guest, children }) {
   }
 
   return (
-    <form action={handleSubmit} className="card space-y-6 p-6 sm:p-8">
+    <form action={handleSubmit} className="card space-y-5 p-5 sm:p-8">
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <label className="label">Full name</label>
@@ -80,8 +80,10 @@ function UpdateProfileForm({ guest, children }) {
         </p>
       )}
 
-      <div className="flex justify-end border-t border-sand-200 pt-6">
-        <SubmitButton pendingLabel="Saving…">Save profile</SubmitButton>
+      <div className="border-t border-sand-200 pt-5 sm:flex sm:justify-end">
+        <SubmitButton pendingLabel="Saving…" className="w-full sm:w-auto">
+          Save profile
+        </SubmitButton>
       </div>
     </form>
   );

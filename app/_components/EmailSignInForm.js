@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRightIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon } from "@heroicons/react/24/outline";
 import { signInWithEmail } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
 import FormError from "./FormError";
@@ -43,9 +43,8 @@ function EmailSignInForm({ next }) {
 
       <FormError message={error} />
 
-      <SubmitButton pendingLabel="Signing in…" className="w-full" look="forest">
+      <SubmitButton pendingLabel="Signing in…" className="w-full">
         Sign in
-        <ArrowRightIcon className="h-4 w-4" />
       </SubmitButton>
     </form>
   );

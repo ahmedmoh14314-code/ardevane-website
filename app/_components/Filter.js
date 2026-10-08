@@ -38,11 +38,7 @@ function Filter() {
             key={option.value}
             onClick={() => handleFilter(option.value)}
             aria-pressed={isActive}
-            className={`min-h-[2.75rem] shrink-0 whitespace-nowrap rounded-full border px-5 font-display text-[1rem] transition-colors ${
-              isActive
-                ? "border-forest-900 bg-forest-900 text-sand-50"
-                : "border-sand-300 bg-transparent text-ink-700 hover:border-forest-700 hover:text-forest-900"
-            }`}
+            className={`pill ${isActive ? "pill-on" : "pill-off"}`}
           >
             {option.label}
           </button>

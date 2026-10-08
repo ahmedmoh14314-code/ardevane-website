@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRightIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { differenceInCalendarDays, format } from "date-fns";
 import CancelReservation from "./CancelReservation";
 import StatusTag from "./StatusTag";
@@ -34,9 +33,6 @@ function Fact({ label, children, className = "" }) {
     </div>
   );
 }
-
-const actionClass =
-  "inline-flex items-center justify-center gap-2 rounded-[3px] border px-4 py-2 font-display text-[0.98rem] transition-colors";
 
 // One reservation: the cabin, the days, what it costs, and what can be done
 function ReservationCard({ booking, today, onCancel }) {
@@ -105,7 +101,7 @@ function ReservationCard({ booking, today, onCancel }) {
             <StatusTag status={status} />
           </div>
 
-          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-[3px] sm:grid-cols-3 bg-sand-100 px-4 py-3">
+          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-[3px] bg-sand-100 px-4 py-3 sm:grid-cols-3">
             <Fact label="Check in">
               {format(toDay(startDate), "MMM d, yyyy")}
             </Fact>
@@ -140,14 +136,13 @@ function ReservationCard({ booking, today, onCancel }) {
               )}
             </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
               {status === "checked_in" && (
                 <Link
                   href="/my-stay"
-                  className={`${actionClass} border-forest-900 bg-forest-900 text-sand-50 hover:bg-forest-700`}
+                  className="btn-forest col-span-2 min-h-[2.6rem] px-5 text-[0.98rem]"
                 >
                   Open My Stay
-                  <ArrowRightIcon className="h-4 w-4" />
                 </Link>
               )}
 
@@ -155,9 +150,8 @@ function ReservationCard({ booking, today, onCancel }) {
                 <>
                   <Link
                     href={`/account/reservations/edit/${id}`}
-                    className={`${actionClass} border-sand-300 bg-white text-ink-800 hover:border-forest-900`}
+                    className="btn-outline min-h-[2.6rem] px-5 text-[0.98rem]"
                   >
-                    <PencilSquareIcon className="h-4 w-4" />
                     Edit
                   </Link>
                   <CancelReservation bookingId={id} onCancel={onCancel} />
@@ -166,7 +160,7 @@ function ReservationCard({ booking, today, onCancel }) {
                 status !== "checked_in" && (
                   <Link
                     href={detailsHref}
-                    className={`${actionClass} border-sand-300 bg-white text-ink-800 hover:border-forest-900`}
+                    className="btn-outline col-span-2 min-h-[2.6rem] px-5 text-[0.98rem]"
                   >
                     View details
                   </Link>

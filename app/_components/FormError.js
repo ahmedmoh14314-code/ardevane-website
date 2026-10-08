@@ -6,7 +6,7 @@ function FormError({ message }) {
   return (
     <p
       role="alert"
-      className="flex animate-fade items-start gap-2 rounded-md bg-[#f8e2da] px-4 py-3 font-label text-sm text-[#9b3b23]"
+      className="flex animate-fade items-start gap-2 rounded-[3px] bg-[#f8e2da] px-4 py-3 font-label text-sm text-[#9b3b23]"
     >
       <ExclamationCircleIcon className="h-5 w-5 shrink-0" />
       {message}

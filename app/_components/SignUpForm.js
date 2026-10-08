@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ArrowRightIcon,
-  EnvelopeIcon,
-  UserIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
+import { EnvelopeIcon, UserIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { signUpWithEmail } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
 import FormError from "./FormError";
@@ -80,13 +75,8 @@ function SignUpForm({ next }) {
 
       <FormError message={error} />
 
-      <SubmitButton
-        pendingLabel="Creating your account…"
-        className="w-full"
-        look="forest"
-      >
+      <SubmitButton pendingLabel="Creating your account…" className="w-full">
         Create account
-        <ArrowRightIcon className="h-4 w-4" />
       </SubmitButton>
     </form>
   );

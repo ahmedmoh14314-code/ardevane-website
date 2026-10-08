@@ -2,32 +2,21 @@
 
 import Link from "next/link";
 import { differenceInDays, format } from "date-fns";
-import {
-  ArrowRightIcon,
-  CalendarIcon,
-  CheckCircleIcon,
-  ChevronDownIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
 import { useReservation } from "./ReservationContext";
 import { formatCurrency, getNightlyPrice, getStayPrice } from "../_lib/pricing";
 import { pickableRange, reviewPath } from "../_lib/stay";
 
+const boxClass =
+  "block rounded-[3px] border border-sand-300 bg-white px-3.5 py-2.5 transition-colors hover:border-forest-700";
+const smallLabel = "block font-label text-[0.72rem] text-ink-500";
+
 function DateBox({ label, date }) {
   return (
-    <a
-      href="#availability"
-      className="flex flex-1 items-center justify-between gap-2 rounded-[3px] border border-sand-300 bg-white px-3.5 py-2.5 transition-colors hover:border-forest-700"
-    >
-      <span>
-        <span className="block font-label text-[0.72rem] text-ink-500">
-          {label}
-        </span>
-        <span className="block font-display text-[1rem] text-ink-800">
-          {date ? format(date, "MMM d, yyyy") : "Add date"}
-        </span>
+    <a href="#availability" className={`${boxClass} flex-1`}>
+      <span className={smallLabel}>{label}</span>
+      <span className="block font-display text-[1rem] text-ink-800">
+        {date ? format(date, "MMM d, yyyy") : "Pick a day"}
       </span>
-      <CalendarIcon className="h-5 w-5 shrink-0 text-ink-600" />
     </a>
   );
 }
@@ -46,10 +35,10 @@ function BookingCard({ cabin, settings, takenNights }) {
   const numNights = hasDates ? differenceInDays(range.to, range.from) : 0;
 
   return (
-    <div className="rounded-md border border-sand-200 bg-sand-100/70 p-5 shadow-soft sm:p-6">
+    <div className="rounded-md border border-sand-200 bg-sand-100/70 p-4 shadow-soft sm:p-6">
       <p className="flex items-baseline gap-2 border-b border-sand-200 pb-4 font-display">
         <span
-          className={`text-[2.1rem] leading-none ${
+          className={`text-[2rem] leading-none ${
             cabin.discount > 0 ? "text-[#2d8663]" : "text-forest-950"
           }`}
         >
@@ -68,25 +57,19 @@ function BookingCard({ cabin, settings, takenNights }) {
         <DateBox label="Check out" date={range.to} />
       </div>
 
-      <label className="relative mt-2.5 flex items-center gap-3 rounded-[3px] border border-sand-300 bg-white px-3.5 py-2.5 transition-colors hover:border-forest-700">
-        <UserIcon className="h-5 w-5 text-ink-600" />
-        <span className="flex-1">
-          <span className="block font-label text-[0.72rem] text-ink-500">
-            Guests
-          </span>
-          <select
-            value={numGuests}
-            onChange={(e) => setGuests(Number(e.target.value))}
-            className="w-full appearance-none bg-transparent font-display text-[1rem] text-ink-800 focus:outline-none"
-          >
-            {Array.from({ length: maxGuests }, (_, i) => i + 1).map((x) => (
-              <option value={x} key={x}>
-                {x} {x === 1 ? "guest" : "guests"}
-              </option>
-            ))}
-          </select>
-        </span>
-        <ChevronDownIcon className="pointer-events-none h-4 w-4 text-ink-600" />
+      <label className={`${boxClass} mt-2.5`}>
+        <span className={smallLabel}>Guests</span>
+        <select
+          value={numGuests}
+          onChange={(e) => setGuests(Number(e.target.value))}
+          className="w-full bg-transparent font-display text-[1rem] text-ink-800 focus:outline-none"
+        >
+          {Array.from({ length: maxGuests }, (_, i) => i + 1).map((x) => (
+            <option value={x} key={x}>
+              {x} {x === 1 ? "guest" : "guests"}
+            </option>
+          ))}
+        </select>
       </label>
 
       {hasDates && (
@@ -108,28 +91,19 @@ function BookingCard({ cabin, settings, takenNights }) {
             to: range.to,
             guests: numGuests,
           })}
-          className="btn-forest mt-4 w-full py-3.5"
+          className="btn-forest mt-4 w-full"
         >
-          Review reservation
-          <ArrowRightIcon className="h-4 w-4" />
+          Continue to booking
         </Link>
       ) : (
-        <a href="#availability" className="btn-forest mt-4 w-full py-3.5">
-          Check availability
-          <ArrowRightIcon className="h-4 w-4" />
+        <a href="#availability" className="btn-forest mt-4 w-full">
+          Pick your dates
         </a>
       )}
 
-      <ul className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1.5 font-label text-[0.78rem] text-ink-600">
-        <li className="flex items-center gap-1.5">
-          <CheckCircleIcon className="h-4 w-4" />
-          Free cancellation until the day before
-        </li>
-        <li className="flex items-center gap-1.5">
-          <CheckCircleIcon className="h-4 w-4" />
-          Pay at the cabin
-        </li>
-      </ul>
+      <p className="mt-3 text-center font-label text-[0.8rem] leading-relaxed text-ink-600">
+        Nothing to pay now. Free cancellation until the day before.
+      </p>
     </div>
   );
 }

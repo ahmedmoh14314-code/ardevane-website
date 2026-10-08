@@ -24,7 +24,7 @@ function EditReservationForm({ booking, settings }) {
   }
 
   return (
-    <form action={handleSubmit} className="card space-y-6 p-6 sm:p-8">
+    <form action={handleSubmit} className="card space-y-5 p-5 sm:p-8">
       <input type="hidden" name="bookingId" value={booking.id} />
 
       <div>
@@ -62,15 +62,17 @@ function EditReservationForm({ booking, settings }) {
 
       <FormError message={error} />
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-sand-200 pt-6">
-        <p className="text-ink-600">
+      <div className="grid gap-4 border-t border-sand-200 pt-5 sm:flex sm:items-center sm:justify-between">
+        <p className="font-display text-[1.05rem] text-ink-600">
           Total{" "}
-          <span className="text-xl font-semibold text-ink-800">
+          <span className="text-[1.3rem] text-forest-950">
             {formatCurrency(booking.totalPrice)}
           </span>
         </p>
 
-        <SubmitButton pendingLabel="Saving…">Save changes</SubmitButton>
+        <SubmitButton pendingLabel="Saving…" className="w-full sm:w-auto">
+          Save changes
+        </SubmitButton>
       </div>
     </form>
   );

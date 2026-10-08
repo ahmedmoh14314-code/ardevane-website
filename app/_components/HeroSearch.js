@@ -2,12 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowRightIcon,
-  CalendarIcon,
-  ChevronDownIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
 import { addDays } from "date-fns";
 import { useReservation } from "./ReservationContext";
 import { toDay, toISODate } from "../_lib/stay";
@@ -19,23 +13,17 @@ function capacityFor(guests) {
   return "large";
 }
 
-// A date that reads "Check in" until one is picked: a text field that
-// becomes the browser's date picker when it is used
-function DateField({ value, min, onChange, placeholder }) {
-  const [isPicking, setIsPicking] = useState(false);
+const fieldClass =
+  "block w-full bg-transparent font-display text-[1.05rem] text-forest-950 focus:outline-none";
 
+function Field({ label, children }) {
   return (
-    <input
-      type={isPicking || value ? "date" : "text"}
-      value={value}
-      min={min}
-      placeholder={placeholder}
-      aria-label={placeholder}
-      onFocus={() => setIsPicking(true)}
-      onBlur={() => setIsPicking(false)}
-      onChange={(e) => onChange(e.target.value)}
-      className={`${isPicking || value ? "w-[7.4rem]" : "w-[5.4rem]"} bg-transparent font-display text-[1rem] text-ink-600 placeholder:text-ink-600 focus:outline-none`}
-    />
+    <label className="block border-b border-sand-300 px-1 pb-2.5 pt-1 md:border-b-0 md:border-r md:px-5 md:py-1">
+      <span className="mb-1 block font-label text-[0.72rem] uppercase tracking-[0.18em] text-ink-500">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }
 
@@ -68,59 +56,47 @@ function HeroSearch() {
   return (
     <form
       onSubmit={search}
-      className="grid gap-4 rounded-md bg-sand-50/95 p-4 shadow-lift backdrop-blur md:grid-cols-[1.2fr_1fr_auto] md:items-center md:gap-0 md:p-3"
+      className="grid gap-4 rounded-md bg-sand-50 p-4 shadow-lift md:grid-cols-[1fr_1fr_0.8fr_auto] md:items-center md:gap-0 md:p-3"
     >
-      <label className="flex items-center gap-4 px-3 md:border-r md:border-sand-300">
-        <CalendarIcon className="h-6 w-6 shrink-0 text-ink-700" />
-        <span className="flex flex-1 flex-col">
-          <span className="font-display text-sm text-ink-700">Dates</span>
-          <span className="flex items-center gap-2 font-display text-ink-600">
-            <DateField
-              value={from}
-              min={today}
-              onChange={(value) => {
-                setFrom(value);
-                // A departure before the new arrival is picked again
-                if (to && value && to <= value) setTo("");
-              }}
-              placeholder="Check in"
-            />
-            <span>&ndash;</span>
-            <DateField
-              value={to}
-              min={from ? toISODate(addDays(toDay(from), 1)) : today}
-              onChange={setTo}
-              placeholder="Check out"
-            />
-          </span>
-        </span>
-      </label>
+      <Field label="Check in">
+        <input
+          type="date"
+          value={from}
+          min={today}
+          onChange={(e) => {
+            setFrom(e.target.value);
+            // A departure before the new arrival is picked again
+            if (to && e.target.value && to <= e.target.value) setTo("");
+          }}
+          className={fieldClass}
+        />
+      </Field>
 
-      <label className="flex items-center gap-4 px-3 md:px-6">
-        <UsersIcon className="h-6 w-6 shrink-0 text-ink-700" />
-        <span className="flex flex-1 flex-col">
-          <span className="font-display text-sm text-ink-700">Guests</span>
-          <span className="relative flex items-center">
-            <select
-              value={guests}
-              onChange={(e) => setGuests(Number(e.target.value))}
-              className="w-full appearance-none bg-transparent pr-6 font-display text-ink-600 focus:outline-none"
-            >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n} {n === 1 ? "guest" : "guests"}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon className="pointer-events-none absolute right-0 h-4 w-4 text-ink-600" />
-          </span>
-        </span>
-      </label>
+      <Field label="Check out">
+        <input
+          type="date"
+          value={to}
+          min={from ? toISODate(addDays(toDay(from), 1)) : today}
+          onChange={(e) => setTo(e.target.value)}
+          className={fieldClass}
+        />
+      </Field>
 
-      <button className="btn-forest h-[3.25rem] px-10 md:ml-3">
-        Search cabins
-        <ArrowRightIcon className="h-4 w-4" />
-      </button>
+      <Field label="Guests">
+        <select
+          value={guests}
+          onChange={(e) => setGuests(Number(e.target.value))}
+          className={fieldClass}
+        >
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+            <option key={n} value={n}>
+              {n} {n === 1 ? "guest" : "guests"}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      <button className="btn-forest md:ml-3">Search cabins</button>
     </form>
   );
 }

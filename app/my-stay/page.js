@@ -2,13 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
-import {
-  ArrowLongRightIcon,
-  ChevronRightIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
 
-import pineBranch from "@/public/img/home/pine-branch.png";
 import { getGuest } from "@/app/_lib/auth";
 import {
   getBookings,
@@ -16,19 +10,14 @@ import {
   getStayCharges,
   getStayRequests,
 } from "@/app/_lib/data-service";
-import { sortBookings } from "@/app/_lib/account";
+import { sortBookings, stayDay } from "@/app/_lib/account";
 import { toDay } from "@/app/_lib/stay";
+import StatusTag from "@/app/_components/StatusTag";
 import StayHub from "@/app/_components/StayHub";
 import StayRequests from "@/app/_components/StayRequests";
 
 export const metadata = {
   title: "My Stay",
-};
-
-const statusLabels = {
-  checked_in: "Checked In",
-  reserved: "Confirmed",
-  pending: "Awaiting confirmation",
 };
 
 // The stay, wherever the guest is with it: in it now, about to come (and
@@ -49,134 +38,110 @@ export default async function Page() {
     : [[], []];
 
   return (
-    <div className="relative overflow-hidden">
-      {/* A sprig of pine in the corner, as in the rest of Ardevane */}
-      <Image
-        src={pineBranch}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -top-4 hidden w-[17rem] opacity-80 md:block"
-      />
+    <div className="mx-auto max-w-6xl px-4 pb-14 pt-7 sm:px-8 sm:pb-20 sm:pt-10">
+      <header className="mb-5 sm:mb-7">
+        <h1 className="font-display text-[2.4rem] leading-none text-forest-950 sm:text-[3.2rem]">
+          My Stay
+        </h1>
+        <p className="mt-2 font-label text-[0.95rem] text-ink-600 sm:text-[1.02rem]">
+          {stay
+            ? "Everything for your stay, brought to your cabin."
+            : servicesFor
+              ? "Order ahead. It will be ready when you arrive."
+              : "Your stay, once you have booked one."}
+        </p>
+      </header>
 
-      <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-8 sm:pb-20 sm:pt-12">
-        <header className="mb-6 sm:mb-8">
-          <h1 className="font-display text-[2.5rem] leading-none text-forest-950 sm:text-[3.6rem]">
-            My Stay
-          </h1>
-          <p className="mt-3 font-label text-[0.98rem] text-ink-700 sm:text-[1.05rem]">
-            Make your stay more comfortable.
+      {shown ? (
+        <StayCard booking={shown} today={today} />
+      ) : (
+        <div className="rounded-md border border-sand-200 bg-sand-100/70 p-6 shadow-soft sm:p-8">
+          <p className="max-w-xl font-display text-[1.15rem] text-ink-700">
+            Book a cabin and this becomes your stay: food to your cabin,
+            housekeeping, help from our team and your charges.
           </p>
-        </header>
+          <Link href="/cabins" className="btn-forest mt-5 w-full sm:w-auto">
+            Explore cabins
+          </Link>
+        </div>
+      )}
 
-        {shown ? (
-          <StayCard booking={shown} />
-        ) : (
-          <div className="rounded-md border border-sand-200 bg-sand-100/70 p-8 shadow-soft">
-            <h2 className="font-display text-[1.7rem] text-forest-950">
-              No stay booked yet
-            </h2>
-            <p className="mt-2 max-w-xl font-display text-ink-600">
-              Book a cabin and this becomes your stay: breakfast to your cabin,
-              housekeeping, help from our team and your charges, even before you
-              arrive.
-            </p>
-            <Link href="/cabins" className="btn-forest mt-6">
-              Explore cabins
-              <ArrowLongRightIcon className="h-5 w-5" />
-            </Link>
-          </div>
-        )}
+      {servicesFor && (
+        <div className="mt-6 sm:mt-8">
+          <StayHub folio={servicesFor.folio} charges={charges} />
+        </div>
+      )}
 
-        {servicesFor && (
-          <div className="mt-5 sm:mt-6">
-            <StayHub folio={servicesFor.folio} charges={charges} />
-          </div>
-        )}
+      {/* A request the hotel hasn't answered yet has no services */}
+      {shown && !servicesFor && (
+        <p className="mt-5 rounded-md border border-sand-200 bg-sand-100/70 p-5 font-display text-[1.05rem] text-ink-700">
+          We are confirming your booking. Once it is confirmed, you can order
+          food and ask for anything right here.
+        </p>
+      )}
 
-        {/* A request the hotel hasn't answered yet has no services */}
-        {shown && !servicesFor && (
-          <p className="mt-6 rounded-md border border-sand-200 bg-sand-100/70 p-5 font-display text-ink-700">
-            We&apos;re confirming your booking. Once it&apos;s confirmed, you
-            can order breakfast and ask for anything you&apos;d like ready,
-            right here.
-          </p>
-        )}
-
-        {requests.length > 0 && (
-          <div className="mt-8">
-            <StayRequests requests={requests} />
-          </div>
-        )}
-
-        {stay === null && servicesFor && (
-          <p className="mt-6 text-center font-label text-sm text-ink-500">
-            Your stay hasn&apos;t started yet: anything you ask for now will be
-            ready when you arrive.
-          </p>
-        )}
-      </div>
+      {requests.length > 0 && (
+        <div className="mt-9 sm:mt-12">
+          <StayRequests requests={requests} />
+        </div>
+      )}
     </div>
   );
 }
 
-function StayCard({ booking }) {
+// The stay in a line: the cabin, the days, and where you are in it
+function StayCard({ booking, today }) {
   const { id, startDate, endDate, numGuests, status, cabins } = booking;
-  const isCheckedIn = status === "checked_in";
+  const isStaying = status === "checked_in";
+  const day = isStaying ? stayDay(booking, today) : null;
+
+  const start = toDay(startDate);
+  const end = toDay(endDate);
+  const sameMonth = start.getMonth() === end.getMonth();
+  const dates = `${format(start, "MMM d")} – ${format(end, sameMonth ? "d, yyyy" : "MMM d, yyyy")}`;
 
   return (
-    <section className="rounded-md border border-sand-200 bg-sand-100/70 p-3 shadow-soft sm:p-4">
-      <Link
-        href={`/account/reservations/${id}`}
-        className="flex items-center gap-4 sm:gap-7"
-      >
-        <div className="relative h-[5.5rem] w-[6.5rem] shrink-0 overflow-hidden rounded-[3px] sm:h-[6.5rem] sm:w-[18.5rem]">
-          <Image
-            src={cabins.image}
-            alt={`Cabin ${cabins.name}`}
-            fill
-            sizes="(min-width: 640px) 18.5rem, 6.5rem"
-            className="object-cover"
-          />
-        </div>
+    <section className="overflow-hidden rounded-md border border-sand-200 bg-sand-50 shadow-soft sm:flex">
+      <div className="relative aspect-[16/8] sm:aspect-auto sm:w-60 sm:shrink-0">
+        <Image
+          src={cabins.image}
+          alt={`Cabin ${cabins.name}`}
+          fill
+          sizes="(min-width: 640px) 15rem, 100vw"
+          className="object-cover"
+        />
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <h2 className="font-display text-[1.2rem] text-forest-950 sm:text-[1.45rem]">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="font-display text-[1.5rem] leading-tight text-forest-950">
               Cabin {cabins.name}
             </h2>
-            <span
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 font-label text-[0.72rem] font-medium sm:px-3 sm:text-[0.8rem] ${
-                isCheckedIn
-                  ? "bg-[#e2efe6] text-[#1d5a3d]"
-                  : status === "pending"
-                    ? "bg-[#f8ecd2] text-[#8a5a12]"
-                    : "bg-sand-200 text-ink-700"
-              }`}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-current" />
-              {statusLabels[status] ?? status}
-            </span>
+            <StatusTag status={status} />
           </div>
-
-          <p className="mt-1 flex items-center gap-2 font-label text-[0.85rem] text-ink-700 sm:mt-2 sm:gap-3 sm:text-[0.98rem]">
-            {format(toDay(startDate), "MMM d, yyyy")}
-            <ArrowLongRightIcon className="h-4 w-4" />
-            {format(toDay(endDate), "MMM d, yyyy")}
+          <p className="mt-1.5 font-label text-[0.92rem] text-ink-700">
+            {dates}
+            <span className="mx-2 text-ink-400">·</span>
+            {numGuests} {numGuests === 1 ? "guest" : "guests"}
+            {day && (
+              <>
+                <span className="mx-2 text-ink-400">·</span>
+                {day.isDepartureDay
+                  ? "Departure day"
+                  : `Day ${day.day} of ${day.of}`}
+              </>
+            )}
           </p>
-
-          <div className="mt-1 flex items-center justify-between gap-3 sm:mt-2">
-            <p className="flex items-center gap-1.5 font-label text-[0.8rem] text-ink-600 sm:text-[0.9rem]">
-              <UserIcon className="h-4 w-4" />
-              {numGuests} {numGuests === 1 ? "Guest" : "Guests"}
-            </p>
-            <span className="hidden rounded-[3px] border border-forest-900 px-5 py-2 font-label text-[0.9rem] text-forest-900 transition-colors hover:bg-forest-900 hover:text-sand-50 sm:inline-block">
-              View Reservation
-            </span>
-          </div>
         </div>
 
-        <ChevronRightIcon className="h-5 w-5 shrink-0 text-ink-600 sm:hidden" />
-      </Link>
+        <Link
+          href={`/account/reservations/${id}`}
+          className="btn-outline min-h-[2.6rem] shrink-0 px-5 text-[0.98rem]"
+        >
+          Reservation details
+        </Link>
+      </div>
     </section>
   );
 }

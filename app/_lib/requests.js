@@ -5,7 +5,7 @@
 export const REQUEST_KINDS = {
   dining: "Dining",
   housekeeping: "Housekeeping",
-  support: "Help",
+  support: "Message to our team",
   maintenance: "Repair",
 };
 

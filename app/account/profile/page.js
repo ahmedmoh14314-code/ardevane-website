@@ -11,11 +11,10 @@ export default async function Page() {
 
   return (
     <div>
-      <header className="mb-8">
+      <header className="mb-6">
         <h1 className="page-title mb-2">Profile</h1>
-        <p className="max-w-2xl font-label text-[1rem] text-ink-600">
-          The front desk needs these at check-in. Fill them in now, and
-          you&apos;ll go straight to your cabin when you arrive.
+        <p className="max-w-2xl font-label text-[0.95rem] text-ink-600">
+          The front desk needs these at check-in.
         </p>
       </header>
 

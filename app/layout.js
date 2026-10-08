@@ -75,7 +75,7 @@ export default function RootLayout({ children }) {
 
         <ReservationProvider>
           {/* Room at the bottom on phones for the tab bar */}
-          <main className="flex-1 pb-20 md:pb-0">{children}</main>
+          <main className="flex-1 pb-[3.4rem] md:pb-0">{children}</main>
         </ReservationProvider>
 
         <Footer />

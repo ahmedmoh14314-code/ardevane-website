@@ -13,17 +13,16 @@ export default async function Page() {
 
   return (
     <div>
-      <header className="mb-8">
+      <header className="mb-6">
         <h1 className="page-title">Reservations</h1>
-        <p className="mt-2 font-label text-[1rem] text-ink-600">
-          Every stay you have booked with us, coming up and before.
-        </p>
       </header>
 
       {bookings.length === 0 ? (
-        <div className="card p-8">
-          <p className="mb-6 text-ink-600">You have no reservations yet.</p>
-          <Link href="/cabins" className="btn-primary">
+        <div className="card p-6 sm:p-8">
+          <p className="mb-5 font-display text-[1.15rem] text-ink-700">
+            You have no reservations yet.
+          </p>
+          <Link href="/cabins" className="btn-forest w-full sm:w-auto">
             Explore the cabins
           </Link>
         </div>

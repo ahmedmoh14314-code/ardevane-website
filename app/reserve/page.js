@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import {
-  ArrowLeftIcon,
-  CalendarDaysIcon,
-  ShieldCheckIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
 
 import { getUser } from "../_lib/auth";
 import { getCabin, quoteBooking } from "../_lib/data-service";
@@ -50,8 +44,7 @@ export default async function Page({ searchParams }) {
         href={changeLink}
         className="mb-5 inline-flex items-center gap-2 font-display text-ink-700 hover:text-forest-900"
       >
-        <ArrowLeftIcon className="h-4 w-4" />
-        Change dates or guests
+        &larr; Change dates or guests
       </Link>
 
       <header className="mb-7">
@@ -76,18 +69,15 @@ export default async function Page({ searchParams }) {
               Cabin {cabin.name}
             </h2>
 
-            <ul className="mt-4 space-y-3 font-label text-[0.95rem] text-ink-700">
-              <li className="flex items-center gap-3">
-                <CalendarDaysIcon className="h-5 w-5 shrink-0 text-bark-500" />
+            <ul className="mt-4 space-y-2 font-display text-[1.05rem] text-ink-700">
+              <li>
                 {format(toDay(stay.from), "EEE, MMM d")} &ndash;{" "}
                 {format(toDay(stay.to), "EEE, MMM d, yyyy")}
               </li>
-              <li className="flex items-center gap-3">
-                <UsersIcon className="h-5 w-5 shrink-0 text-bark-500" />
+              <li>
                 {stay.guests} {stay.guests === 1 ? "guest" : "guests"}
               </li>
-              <li className="flex items-center gap-3">
-                <ShieldCheckIcon className="h-5 w-5 shrink-0 text-bark-500" />
+              <li>
                 Free changes and cancellation until the day before you arrive
               </li>
             </ul>
@@ -115,7 +105,10 @@ export default async function Page({ searchParams }) {
             {error && (
               <div className="mt-6 space-y-4">
                 <FormError message={error} />
-                <Link href={changeLink} className="btn-secondary">
+                <Link
+                  href={changeLink}
+                  className="btn-outline w-full sm:w-auto"
+                >
                   Choose other dates
                 </Link>
               </div>

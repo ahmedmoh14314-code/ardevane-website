@@ -67,11 +67,7 @@ function ReservationList({ bookings, today }) {
               role="tab"
               aria-selected={isActive}
               onClick={() => setTab(key)}
-              className={`flex min-h-[2.75rem] shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-5 font-display text-[1rem] transition-colors ${
-                isActive
-                  ? "border-forest-900 bg-forest-900 text-sand-50"
-                  : "border-sand-300 text-ink-700 hover:border-forest-700 hover:text-forest-900"
-              }`}
+              className={`pill ${isActive ? "pill-on" : "pill-off"}`}
             >
               {label}
               <span

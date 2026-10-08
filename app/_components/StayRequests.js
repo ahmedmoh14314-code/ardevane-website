@@ -1,38 +1,8 @@
 import Image from "next/image";
 import { format } from "date-fns";
-import {
-  CheckIcon,
-  LifebuoyIcon,
-  SparklesIcon,
-  WrenchScrewdriverIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { formatCurrency } from "../_lib/pricing";
 import { REQUEST_KINDS, requestStatusLabel } from "../_lib/requests";
-
-function Cutlery(props) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10" />
-      <path d="M17 21V3c-2 1-3.5 3.5-3.5 7 0 1.5.8 2.5 2 2.5h1.5" />
-    </svg>
-  );
-}
-
-const kindIcons = {
-  dining: Cutlery,
-  housekeeping: SparklesIcon,
-  support: LifebuoyIcon,
-  maintenance: WrenchScrewdriverIcon,
-};
 
 const STEPS = ["new", "in_progress", "completed"];
 
@@ -91,7 +61,9 @@ function Dishes({ items }) {
                 className="object-cover"
               />
             ) : (
-              <Cutlery className="absolute inset-0 m-auto h-7 w-7 text-ink-400" />
+              <span className="absolute inset-0 flex items-center justify-center font-display text-2xl text-forest-950/40">
+                {item.name.charAt(0)}
+              </span>
             )}
             {item.quantity > 1 && (
               <span className="absolute bottom-1 right-1 rounded-full bg-forest-950/85 px-1.5 font-label text-[0.7rem] font-semibold text-sand-50">
@@ -132,8 +104,7 @@ function StayRequests({ requests = [], title = "Your orders & requests" }) {
 
   return (
     <section>
-      <p className="eyebrow mb-1">From the front desk</p>
-      <h2 className="mb-5 font-display text-[1.9rem] text-forest-950">
+      <h2 className="mb-4 font-display text-[1.7rem] text-forest-950 sm:text-[1.9rem]">
         {title}
       </h2>
 
@@ -144,7 +115,6 @@ function StayRequests({ requests = [], title = "Your orders & requests" }) {
             (sum, item) => sum + item.unitPrice * item.quantity,
             0
           );
-          const Icon = kindIcons[request.type] ?? SparklesIcon;
           const isDone = request.status === "completed";
           const when = whenFor(request);
 
@@ -156,19 +126,20 @@ function StayRequests({ requests = [], title = "Your orders & requests" }) {
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sand-200 text-forest-900">
-                    <Icon className="h-5 w-5" />
-                  </span>
+                <div className="min-w-0">
                   <div className="min-w-0">
                     <p className="font-display text-[1.2rem] leading-tight text-forest-950">
-                      {request.type === "dining"
-                        ? "Food order"
-                        : REQUEST_KINDS[request.type]}
+                      {request.type === "dining" ? "Food order" : request.title}
                     </p>
                     <p className="font-label text-[0.8rem] text-ink-500">
-                      {when ??
-                        format(new Date(request.created_at), "MMM d, HH:mm")}
+                      {[
+                        request.type === "dining"
+                          ? null
+                          : REQUEST_KINDS[request.type],
+                        when,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
                 </div>
@@ -188,12 +159,8 @@ function StayRequests({ requests = [], title = "Your orders & requests" }) {
                 </div>
               </div>
 
-              {request.type === "dining" && items.length > 0 ? (
+              {request.type === "dining" && items.length > 0 && (
                 <Dishes items={items} />
-              ) : (
-                <p className="font-display text-[1.05rem] text-ink-800">
-                  {request.title}
-                </p>
               )}
 
               {request.note && (

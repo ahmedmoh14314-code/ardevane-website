@@ -10,7 +10,7 @@ function ReservationReminder() {
   if (!range.from || !range.to) return null;
 
   return (
-    <div className="fixed bottom-24 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 animate-rise items-center gap-4 rounded-[3px] bg-forest-900 px-6 py-4 font-display text-sand-100 shadow-lift md:bottom-6">
+    <div className="fixed bottom-[4.2rem] left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 animate-rise items-center gap-4 rounded-[3px] bg-forest-900 px-6 py-4 font-display text-sand-100 shadow-lift md:bottom-6">
       <p className="flex-1">
         Your dates are still picked:{" "}
         <span className="text-bark-400">

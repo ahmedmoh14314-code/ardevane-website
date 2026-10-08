@@ -86,7 +86,7 @@ function DateSelector({ settings, cabin, takenNights }) {
         {(range.from || range.to) && (
           <button
             onClick={resetRange}
-            className="rounded-full border border-sand-300 px-4 py-1.5 font-display text-ink-700 hover:border-forest-700"
+            className="pill pill-off min-h-[2.4rem] px-4"
           >
             Clear dates
           </button>

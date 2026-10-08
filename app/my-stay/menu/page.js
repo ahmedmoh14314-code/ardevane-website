@@ -10,7 +10,7 @@ import { sortBookings, stayDays } from "@/app/_lib/account";
 import DiningMenu from "@/app/_components/DiningMenu";
 
 export const metadata = {
-  title: "Dining",
+  title: "Food & drinks",
 };
 
 // The dining menu, for the stay the guest is in or their next confirmed one
@@ -22,20 +22,20 @@ export default async function Page() {
   const menu = servicesFor ? await getMenu() : [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-8 sm:px-8 sm:pt-12">
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-8 sm:pt-10 lg:pb-16">
       <Link
         href="/my-stay"
-        className="inline-block font-display text-ink-600 hover:text-forest-900"
+        className="inline-block font-display text-ink-700 hover:text-forest-900"
       >
         &larr; My Stay
       </Link>
 
-      <header>
-        <p className="eyebrow mb-2">Dining</p>
-        <h1 className="page-title mb-2">Brought to your cabin</h1>
-        <p className="max-w-2xl text-ink-600">
-          Breakfast, lunch and dinner from our kitchen, with desserts and
-          drinks. Choose the day and time, and we bring it to Cabin{" "}
+      <header className="mb-4 mt-4 sm:mb-6">
+        <h1 className="font-display text-[2.4rem] leading-none text-forest-950 sm:text-[3.2rem]">
+          Food & drinks
+        </h1>
+        <p className="mt-2 font-label text-[0.95rem] text-ink-600 sm:text-[1.02rem]">
+          Pick what you like, choose a day and time, and we bring it to Cabin{" "}
           {servicesFor?.cabins.name ?? ""}.
         </p>
       </header>
@@ -47,11 +47,11 @@ export default async function Page() {
           isStaying={Boolean(stay)}
         />
       ) : (
-        <div className="card p-8">
-          <p className="mb-6 text-ink-600">
+        <div className="rounded-md border border-sand-200 bg-sand-50 p-6 shadow-soft sm:p-8">
+          <p className="font-display text-[1.15rem] text-ink-700">
             The menu opens once you have a confirmed stay with us.
           </p>
-          <Link href="/cabins" className="btn-primary">
+          <Link href="/cabins" className="btn-forest mt-5 w-full sm:w-auto">
             Book a stay
           </Link>
         </div>

@@ -14,7 +14,7 @@ export default function SubmitButton({
 
   return (
     <button
-      className={`${look === "forest" ? "btn-forest" : "btn-primary"} px-8 py-3.5 ${className}`}
+      className={`btn-forest px-8 ${className}`}
       disabled={pending || disabled}
     >
       {pending ? (

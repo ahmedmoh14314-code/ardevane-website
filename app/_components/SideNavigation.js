@@ -2,69 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  CalendarDaysIcon,
-  ChevronRightIcon,
-  HomeIcon,
-  HomeModernIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
 import SignOutButton from "./SignOutButton";
 
-const navLinks = [
-  { name: "Overview", href: "/account", icon: HomeIcon },
-  {
-    name: "Reservations",
-    href: "/account/reservations",
-    icon: CalendarDaysIcon,
-  },
-  { name: "My Stay", href: "/my-stay", icon: HomeModernIcon },
-  { name: "Profile", href: "/account/profile", icon: UserIcon },
+const pages = [
+  { name: "Overview", href: "/account" },
+  { name: "Reservations", href: "/account/reservations" },
+  { name: "Profile", href: "/account/profile" },
 ];
 
-// The account's own menu: a list beside the page on wide screens, rows with
-// a chevron on phones. Sign out is at the bottom, always.
+// Editing a reservation still lights up "Reservations"
+function isActive(pathname, href) {
+  if (href === "/account") return pathname === href;
+  return pathname.startsWith(href);
+}
+
+// The account's three pages. On phones: a row of tabs under the heading,
+// with nothing else in the way. On wide screens: a list down the side,
+// with sign out at its foot.
 function SideNavigation() {
   const pathname = usePathname();
 
-  // Editing a reservation still lights up "Reservations"
-  function isActive(href) {
-    if (href === "/account") return pathname === href;
-    return pathname.startsWith(href);
-  }
-
   return (
-    <nav className="flex flex-col gap-6 md:sticky md:top-24 md:min-h-[calc(100vh-9rem)] md:self-start">
-      <div>
-        <h2 className="mb-4 font-display text-[1.9rem] text-forest-950 md:text-[1.7rem]">
-          My Account
-        </h2>
+    <nav className="md:sticky md:top-24 md:flex md:min-h-[calc(100vh-9rem)] md:flex-col">
+      <h2 className="font-display text-[2.2rem] leading-none text-forest-950 md:text-[1.7rem]">
+        My account
+      </h2>
 
-        <ul className="divide-y divide-sand-200 overflow-hidden rounded-md border border-sand-200 bg-sand-50 md:divide-y-0 md:rounded-none md:border-0 md:bg-transparent">
-          {navLinks.map(({ name, href, icon: Icon }) => {
-            const active = isActive(href);
+      <ul className="-mx-4 mt-5 flex border-b border-sand-200 px-4 sm:-mx-8 sm:px-8 md:mx-0 md:mt-6 md:flex-col md:border-0 md:px-0">
+        {pages.map(({ name, href }) => {
+          const active = isActive(pathname, href);
 
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={`flex items-center gap-3.5 border-l-2 px-4 py-3.5 font-display text-[1.05rem] transition-colors md:rounded-r-md md:py-3 ${
-                    active
-                      ? "border-forest-900 bg-sand-200/70 text-forest-950"
-                      : "border-transparent text-ink-600 hover:bg-sand-100 hover:text-forest-900"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="flex-1">{name}</span>
-                  <ChevronRightIcon className="h-4 w-4 text-ink-400 md:hidden" />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+          return (
+            <li key={href}>
+              <Link
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`-mb-px block border-b-2 px-1 pb-3 font-display text-[1.05rem] transition-colors md:border-b-0 md:border-l-2 md:px-4 md:py-2.5 ${
+                  active
+                    ? "border-bark-500 text-forest-950 md:border-forest-900 md:bg-sand-200/70"
+                    : "border-transparent text-ink-600 hover:text-forest-900 md:hover:bg-sand-100"
+                } mr-7 md:mr-0`}
+              >
+                {name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
 
-      <div className="mt-auto">
+      <div className="mt-auto hidden md:block">
         <SignOutButton />
       </div>
     </nav>

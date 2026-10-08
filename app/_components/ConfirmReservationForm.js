@@ -55,7 +55,7 @@ function ConfirmReservationForm({ stay, user }) {
 
       <FormError message={error} />
 
-      <SubmitButton pendingLabel="Sending…" look="forest" className="w-full">
+      <SubmitButton pendingLabel="Sending…" className="w-full">
         Send booking request
       </SubmitButton>
 
