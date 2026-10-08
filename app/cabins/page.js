@@ -14,19 +14,14 @@ export default function Page({ searchParams }) {
   const filter = searchParams?.capacity ?? "all";
 
   return (
-    <div className="page">
-      <header className="mb-10 animate-rise">
-        <p className="eyebrow mb-3">Stay with us</p>
-        <h1 className="page-title mb-4">Our cabins</h1>
-        <p className="max-w-2xl text-lg leading-relaxed text-ink-600">
-          Every cabin has its own deck, a fireplace and a view of the lake or
-          the mountains. Pick the size that fits, then choose your dates.
-        </p>
-      </header>
-
-      <div className="mb-8 flex justify-end">
+    <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
+      {/* Just the title and the sizes: the cabins themselves come straight after */}
+      <header className="mb-8 flex flex-col gap-4 border-b border-sand-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="font-display text-[2rem] leading-none text-forest-950">
+          Our cabins
+        </h1>
         <Filter />
-      </div>
+      </header>
 
       <Suspense fallback={<Spinner />} key={filter}>
         <CabinList filter={filter} />

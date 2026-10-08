@@ -34,7 +34,7 @@ export default async function Page({ params }) {
     <div className="space-y-6">
       <Link
         href="/account/reservations"
-        className="inline-block text-sm font-medium text-ink-500 hover:text-brand-700"
+        className="inline-block font-display text-ink-600 hover:text-forest-900"
       >
         &larr; Your reservations
       </Link>

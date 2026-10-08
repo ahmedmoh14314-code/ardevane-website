@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AuthCard, { Divider } from "../_components/AuthCard";
+import AuthPanel, { AuthHeading, OrDivider } from "../_components/AuthPanel";
 import SignInButton from "../_components/SignInButton";
 import SignUpForm from "../_components/SignUpForm";
 import { safeNextPath } from "../_lib/users";
@@ -12,26 +12,27 @@ export default function Page({ searchParams }) {
   const next = safeNextPath(searchParams?.next);
 
   return (
-    <AuthCard
-      eyebrow="Guest area"
-      title="Create your account"
-      intro="One account for your reservations and your stays with us."
-    >
-      <SignInButton next={next} />
-
-      <Divider />
+    <AuthPanel>
+      <AuthHeading
+        title="Create account"
+        intro="Join Ardevane and start your mountain journey."
+      />
 
       <SignUpForm next={next} />
 
-      <p className="mt-6 text-sm text-ink-600">
+      <OrDivider />
+
+      <SignInButton next={next} />
+
+      <p className="mt-6 border-t border-sand-200 pt-5 text-center font-label text-[0.9rem] text-ink-600">
         Already have an account?{" "}
         <Link
           href={`/login?next=${encodeURIComponent(next)}`}
-          className="font-medium text-brand-700 underline decoration-brand-200 underline-offset-4 hover:decoration-brand-600"
+          className="font-semibold text-forest-900 underline underline-offset-4"
         >
           Sign in
         </Link>
       </p>
-    </AuthCard>
+    </AuthPanel>
   );
 }

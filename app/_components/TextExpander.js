@@ -20,7 +20,7 @@ function TextExpander({ children }) {
     <span>
       {displayText}{" "}
       <button
-        className="font-medium text-brand-700 underline decoration-brand-200 underline-offset-4 hover:decoration-brand-600"
+        className="font-display text-bark-700 underline decoration-sand-300 underline-offset-4 hover:decoration-bark-600"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? "Show less" : "Read more"}

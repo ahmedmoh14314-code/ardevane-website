@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { ArrowRightIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 import { signInWithEmail } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
 import FormError from "./FormError";
-import PasswordField from "./PasswordField";
+import { AuthField, AuthPassword } from "./AuthField";
 
 function EmailSignInForm({ next }) {
   const [error, setError] = useState("");
@@ -19,38 +20,32 @@ function EmailSignInForm({ next }) {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4 text-left">
+    <form action={handleSubmit} className="space-y-4">
       <input type="hidden" name="next" value={next ?? ""} />
 
-      <div>
-        <label htmlFor="email" className="label">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          className="field"
-          required
-        />
-      </div>
+      <AuthField
+        label="Email"
+        icon={EnvelopeIcon}
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        placeholder="you@example.com"
+      />
 
-      <div>
-        <label htmlFor="password" className="label">
-          Password
-        </label>
-        <PasswordField
-          id="password"
-          name="password"
-          autoComplete="current-password"
-        />
-      </div>
+      <AuthPassword
+        label="Password"
+        id="password"
+        name="password"
+        autoComplete="current-password"
+        placeholder="Your password"
+      />
 
       <FormError message={error} />
 
-      <SubmitButton pendingLabel="Signing in…" className="w-full">
+      <SubmitButton pendingLabel="Signing in…" className="w-full" look="forest">
         Sign in
+        <ArrowRightIcon className="h-4 w-4" />
       </SubmitButton>
     </form>
   );

@@ -18,6 +18,27 @@ function bookingError(error, fallback) {
     : fallback;
 }
 
+// The guest who sent a form. A guest who saw the page signed in can still
+// arrive here with a session that expired a moment ago, so it is refreshed
+// once before they are treated as signed out (and sent to sign in again).
+async function signedInUser(supabase) {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (user) return user;
+
+  const { data, error: refreshError } = await supabase.auth.refreshSession();
+  if (!data?.user)
+    console.warn(
+      "Booking sent without a session:",
+      error?.message,
+      refreshError?.message
+    );
+
+  return data?.user ?? null;
+}
+
 function readObservations(formData) {
   return String(formData.get("observations") ?? "")
     .trim()
@@ -81,9 +102,7 @@ export async function createBooking(formData) {
   };
 
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await signedInUser(supabase);
 
   // Signed out in the meantime: sign in, then come back to this same review
   if (!user) redirect(`/login?next=${encodeURIComponent(reviewPath(stay))}`);
@@ -156,6 +175,7 @@ export async function createStayRequest({
   note,
   priority,
   requestedFor,
+  requestedDate,
   items,
 }) {
   const { error } = await createClient().rpc("create_stay_request", {
@@ -165,6 +185,7 @@ export async function createStayRequest({
     p_priority: priority ?? "normal",
     p_requested_for: requestedFor || null,
     p_items: items ?? null,
+    p_requested_date: requestedDate || null,
   });
 
   if (error)
@@ -230,7 +251,14 @@ export async function signInWithEmail(formData) {
 }
 
 export async function signUpWithEmail(formData) {
-  const fullName = String(formData.get("fullName") ?? "").trim();
+  // The form asks for a first and a last name; older forms sent one field
+  const fullName = (
+    formData.get("fullName") ??
+    `${formData.get("firstName") ?? ""} ${formData.get("lastName") ?? ""}`
+  )
+    .toString()
+    .trim()
+    .replace(/\s+/g, " ");
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const next = safeNextPath(formData.get("next"));
@@ -287,8 +315,11 @@ export async function signUpWithEmail(formData) {
   redirect(next);
 }
 
+// Signs out of this website only. supabase-js signs out every session of
+// the account by default, which would also end the same person's session
+// in Ardevane Operations.
 export async function signOutAction() {
-  await createClient().auth.signOut();
+  await createClient().auth.signOut({ scope: "local" });
 
   redirect("/");
 }

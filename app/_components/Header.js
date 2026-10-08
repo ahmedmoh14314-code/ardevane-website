@@ -1,17 +1,19 @@
 import Logo from "@/app/_components/Logo";
 import Navigation from "@/app/_components/Navigation";
-import { getUser } from "../_lib/auth";
+import MobileTabBar from "@/app/_components/MobileTabBar";
 
-async function Header() {
-  const user = await getUser();
-
+function Header() {
   return (
-    <header className="sticky top-0 z-30 border-b border-cream-200 bg-cream-50/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-8">
-        <Logo />
-        <Navigation user={user} />
-      </div>
-    </header>
+    <>
+      <header className="sticky top-0 z-30 border-b border-sand-200 bg-sand-50/95 backdrop-blur">
+        <nav className="relative mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8">
+          <Logo />
+          <Navigation />
+        </nav>
+      </header>
+
+      <MobileTabBar />
+    </>
   );
 }
 

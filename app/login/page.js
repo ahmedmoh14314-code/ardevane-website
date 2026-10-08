@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AuthCard, { Divider } from "../_components/AuthCard";
+import AuthPanel, { AuthHeading, OrDivider } from "../_components/AuthPanel";
 import SignInButton from "../_components/SignInButton";
 import EmailSignInForm from "../_components/EmailSignInForm";
 import FormError from "../_components/FormError";
@@ -20,32 +20,33 @@ export default function Page({ searchParams }) {
   const error = errors[searchParams?.error];
 
   return (
-    <AuthCard
-      eyebrow="Guest area"
-      title="Welcome back"
-      intro="Sign in to reserve a cabin and to see or change your stays."
-    >
+    <AuthPanel>
+      <AuthHeading
+        title="Welcome back"
+        intro="Sign in to manage your reservations, view upcoming stays, and explore our mountain cabins."
+      />
+
       {error && (
-        <div className="mb-6">
+        <div className="mb-5">
           <FormError message={error} />
         </div>
       )}
 
-      <SignInButton next={next} />
-
-      <Divider />
-
       <EmailSignInForm next={next} />
 
-      <p className="mt-6 text-sm text-ink-600">
-        New to Ardevane?{" "}
+      <OrDivider />
+
+      <SignInButton next={next} />
+
+      <p className="mt-6 border-t border-sand-200 pt-5 text-center font-label text-[0.9rem] text-ink-600">
+        Don&apos;t have an account yet?{" "}
         <Link
           href={`/signup?next=${encodeURIComponent(next)}`}
-          className="font-medium text-brand-700 underline decoration-brand-200 underline-offset-4 hover:decoration-brand-600"
+          className="font-semibold text-forest-900 underline underline-offset-4"
         >
           Create an account
         </Link>
       </p>
-    </AuthCard>
+    </AuthPanel>
   );
 }

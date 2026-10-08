@@ -10,17 +10,17 @@ function ReservationReminder() {
   if (!range.from || !range.to) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 animate-rise items-center gap-4 rounded-2xl bg-brand-900 px-6 py-4 text-sm text-cream-100 shadow-lift">
+    <div className="fixed bottom-24 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 animate-rise items-center gap-4 rounded-[3px] bg-forest-900 px-6 py-4 font-display text-sand-100 shadow-lift md:bottom-6">
       <p className="flex-1">
         Your dates are still picked:{" "}
-        <span className="font-semibold text-gold-300">
+        <span className="text-bark-400">
           {format(new Date(range.from), "MMM d")} &ndash;{" "}
           {format(new Date(range.to), "MMM d, yyyy")}
         </span>
         . Open a cabin to reserve them.
       </p>
       <button
-        className="rounded-full p-1 transition-colors hover:bg-brand-800"
+        className="rounded-full p-1 transition-colors hover:bg-forest-700"
         onClick={resetRange}
         aria-label="Forget these dates"
       >

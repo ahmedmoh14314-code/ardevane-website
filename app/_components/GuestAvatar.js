@@ -21,7 +21,7 @@ function GuestAvatar({ user, size = "h-8 w-8 text-xs" }) {
 
   return (
     <span
-      className={`${size} flex items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-800`}
+      className={`${size} flex items-center justify-center rounded-full bg-sand-200 font-label font-semibold text-forest-900`}
     >
       {initials}
     </span>

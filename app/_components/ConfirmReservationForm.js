@@ -22,12 +22,16 @@ function ConfirmReservationForm({ stay, user }) {
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-5">
+      <h2 className="font-display text-[1.7rem] leading-tight text-forest-950">
+        Send your request
+      </h2>
+
       <input type="hidden" name="cabinId" value={stay.cabinId} />
       <input type="hidden" name="from" value={stay.from} />
       <input type="hidden" name="to" value={stay.to} />
       <input type="hidden" name="guests" value={stay.guests} />
 
-      <div className="flex items-center gap-3 text-sm">
+      <div className="flex items-center gap-3 border-b border-sand-200 pb-5 font-label text-[0.92rem]">
         <GuestAvatar user={user} />
         <p className="text-ink-600">
           Booking as{" "}
@@ -51,12 +55,12 @@ function ConfirmReservationForm({ stay, user }) {
 
       <FormError message={error} />
 
-      <SubmitButton pendingLabel="Confirming…" className="w-full">
-        Confirm reservation
+      <SubmitButton pendingLabel="Sending…" look="forest" className="w-full">
+        Send booking request
       </SubmitButton>
 
-      <p className="text-center text-xs text-ink-500">
-        Nothing to pay now. You pay at the cabin when you arrive.
+      <p className="text-center font-label text-[0.82rem] leading-relaxed text-ink-500">
+        Your nights are held while the front desk confirms. Nothing to pay now.
       </p>
     </form>
   );

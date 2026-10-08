@@ -33,10 +33,14 @@ export async function middleware(request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && request.nextUrl.pathname.startsWith("/account")) {
+  const { pathname } = request.nextUrl;
+  const isPrivate =
+    pathname.startsWith("/account") || pathname.startsWith("/my-stay");
+
+  if (!user && isPrivate) {
     const signIn = request.nextUrl.clone();
     signIn.pathname = "/login";
-    signIn.search = `?next=${encodeURIComponent(request.nextUrl.pathname)}`;
+    signIn.search = `?next=${encodeURIComponent(pathname)}`;
 
     return NextResponse.redirect(signIn);
   }

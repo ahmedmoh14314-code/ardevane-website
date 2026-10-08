@@ -1,21 +1,44 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRightIcon,
-  DocumentTextIcon,
-  PencilSquareIcon,
-} from "@heroicons/react/24/outline";
-import { format, formatDistance, isToday } from "date-fns";
+import { ArrowRightIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { differenceInCalendarDays, format } from "date-fns";
 import CancelReservation from "./CancelReservation";
 import StatusTag from "./StatusTag";
 import { formatCurrency } from "../_lib/pricing";
+import { stayDay } from "../_lib/account";
 import { canChangeOnline, toDay } from "../_lib/stay";
 
-export const formatDistanceFromNow = (dateStr) =>
-  formatDistance(toDay(dateStr), new Date(), {
-    addSuffix: true,
-  }).replace("about ", "");
+// "Arrives in 25 days", "Day 2 of 6": where the stay is, in a few words
+function whenLine(booking, today) {
+  const { status, startDate } = booking;
 
+  if (status === "checked_in") {
+    const { day, of, isDepartureDay } = stayDay(booking, today);
+    return isDepartureDay ? "Departure day" : `Day ${day} of ${of}`;
+  }
+
+  if (status !== "reserved" && status !== "pending") return null;
+
+  const days = differenceInCalendarDays(toDay(startDate), toDay(today));
+  if (days <= 0) return "Arrives today";
+  return days === 1 ? "Arrives tomorrow" : `Arrives in ${days} days`;
+}
+
+function Fact({ label, children, className = "" }) {
+  return (
+    <div className={`min-w-0 ${className}`}>
+      <dt className="font-label text-[0.75rem] text-ink-500">{label}</dt>
+      <dd className="mt-0.5 font-display text-[1.05rem] text-ink-800">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
+const actionClass =
+  "inline-flex items-center justify-center gap-2 rounded-[3px] border px-4 py-2 font-display text-[0.98rem] transition-colors";
+
+// One reservation: the cabin, the days, what it costs, and what can be done
 function ReservationCard({ booking, today, onCancel }) {
   const {
     id,
@@ -26,132 +49,134 @@ function ReservationCard({ booking, today, onCancel }) {
     totalPrice,
     numGuests,
     status,
-    created_at,
     folio,
     cabins: { name, image },
   } = booking;
 
   const isClosed = status === "cancelled" || status === "no_show";
+  const detailsHref = `/account/reservations/${id}`;
+  const when = whenLine(booking, today);
 
   // Once the guest has arrived the folio is what counts: the nights plus
   // anything added, and what has been paid. Before that, the nights alone.
   const hasFolio =
     (status === "checked_in" || status === "checked_out") && folio;
+  const total = hasFolio ? folio.total : totalPrice;
 
   return (
     <li
-      className={`card flex flex-col overflow-hidden sm:flex-row ${
-        isClosed ? "opacity-70" : ""
+      className={`overflow-hidden rounded-md border border-sand-200 bg-sand-50 shadow-soft transition-shadow hover:shadow-lift ${
+        isClosed ? "opacity-80" : ""
       }`}
     >
-      <div className="relative aspect-[16/9] sm:aspect-auto sm:w-44">
-        <Image
-          src={image}
-          alt={`Cabin ${name}`}
-          fill
-          sizes="(min-width: 640px) 11rem, 100vw"
-          className={`object-cover ${isClosed ? "grayscale" : ""}`}
-        />
-      </div>
+      <div className="flex flex-col sm:flex-row">
+        <Link
+          href={detailsHref}
+          className="relative aspect-[16/9] shrink-0 overflow-hidden sm:aspect-auto sm:w-56 lg:w-64"
+        >
+          <Image
+            src={image}
+            alt={`Cabin ${name}`}
+            fill
+            sizes="(min-width: 1024px) 16rem, (min-width: 640px) 14rem, 100vw"
+            className={`object-cover transition-transform duration-500 hover:scale-105 ${
+              isClosed ? "grayscale" : ""
+            }`}
+          />
+        </Link>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-display text-2xl text-brand-900">
-            {numNights} nights in Cabin {name}
-          </h3>
-
-          <StatusTag status={status} />
-        </div>
-
-        <p className="text-ink-600">
-          {format(toDay(startDate), "EEE, MMM d yyyy")}
-          {!isClosed &&
-            ` (${
-              isToday(toDay(startDate))
-                ? "Today"
-                : formatDistanceFromNow(startDate)
-            })`}{" "}
-          &mdash; {format(toDay(endDate), "EEE, MMM d yyyy")}
-        </p>
-
-        <div className="mt-auto flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-          {hasFolio ? (
-            <>
-              <p className="text-lg font-semibold text-ink-800">
-                {formatCurrency(folio.total)}
+        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-label text-[0.72rem] uppercase tracking-[0.2em] text-bark-600">
+                {reference}
               </p>
-              <p
-                className={
-                  folio.remaining > 0
-                    ? "font-medium text-[#9b3b23]"
-                    : "text-brand-700"
-                }
+              <h3 className="mt-1 font-display text-[1.6rem] leading-tight text-forest-950">
+                <Link href={detailsHref} className="hover:text-forest-700">
+                  Cabin {name}
+                </Link>
+              </h3>
+              {when && (
+                <p className="mt-0.5 font-label text-[0.85rem] text-ink-600">
+                  {when}
+                </p>
+              )}
+            </div>
+            <StatusTag status={status} />
+          </div>
+
+          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-[3px] sm:grid-cols-3 bg-sand-100 px-4 py-3">
+            <Fact label="Check in">
+              {format(toDay(startDate), "MMM d, yyyy")}
+            </Fact>
+            <Fact label="Check out">
+              {format(toDay(endDate), "MMM d, yyyy")}
+            </Fact>
+            <Fact label="Stay" className="col-span-2 sm:col-span-1">
+              {numNights} {numNights === 1 ? "night" : "nights"}, {numGuests}{" "}
+              {numGuests === 1 ? "guest" : "guests"}
+            </Fact>
+          </dl>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-sand-200 pt-4">
+            <p className="font-label text-[0.85rem] text-ink-600">
+              <span
+                className={`mr-2 font-display text-[1.35rem] text-forest-950 ${
+                  isClosed ? "line-through decoration-ink-400" : ""
+                }`}
               >
-                {folio.remaining > 0
-                  ? `${formatCurrency(folio.paid)} paid · ${formatCurrency(folio.remaining)} remaining`
-                  : "Paid in full"}
-              </p>
-            </>
-          ) : (
-            <p className="text-lg font-semibold text-ink-800">
-              {formatCurrency(totalPrice)}
-              {status === "reserved" && (
-                <span className="ml-1 text-sm font-normal text-ink-500">
-                  accommodation
-                </span>
+                {formatCurrency(total)}
+              </span>
+              {hasFolio ? (
+                folio.remaining > 0 ? (
+                  <span className="text-[#9b3b23]">
+                    {formatCurrency(folio.remaining)} left to pay
+                  </span>
+                ) : (
+                  <span className="text-[#1d5a3d]">Paid in full</span>
+                )
+              ) : (
+                !isClosed && "Paid at the cabin"
               )}
             </p>
-          )}
-          <p className="text-ink-500">
-            {numGuests} guest{numGuests > 1 && "s"}
-          </p>
-          <p className="text-ink-400 sm:ml-auto">
-            <span className="font-medium text-ink-600">{reference}</span>{" "}
-            &middot; booked {format(new Date(created_at), "MMM d, yyyy")}
-          </p>
+
+            <div className="flex flex-wrap gap-2">
+              {status === "checked_in" && (
+                <Link
+                  href="/my-stay"
+                  className={`${actionClass} border-forest-900 bg-forest-900 text-sand-50 hover:bg-forest-700`}
+                >
+                  Open My Stay
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+              )}
+
+              {canChangeOnline(booking, today) ? (
+                <>
+                  <Link
+                    href={`/account/reservations/edit/${id}`}
+                    className={`${actionClass} border-sand-300 bg-white text-ink-800 hover:border-forest-900`}
+                  >
+                    <PencilSquareIcon className="h-4 w-4" />
+                    Edit
+                  </Link>
+                  <CancelReservation bookingId={id} onCancel={onCancel} />
+                </>
+              ) : (
+                status !== "checked_in" && (
+                  <Link
+                    href={detailsHref}
+                    className={`${actionClass} border-sand-300 bg-white text-ink-800 hover:border-forest-900`}
+                  >
+                    View details
+                  </Link>
+                )
+              )}
+            </div>
+          </div>
         </div>
       </div>
-
-      {status === "checked_in" && (
-        <CardLink href="/account" icon={ArrowRightIcon}>
-          My stay
-        </CardLink>
-      )}
-
-      {status === "checked_out" && (
-        <CardLink href={`/account/reservations/${id}`} icon={DocumentTextIcon}>
-          Details
-        </CardLink>
-      )}
-
-      {canChangeOnline(booking, today) && (
-        <div className="flex border-t border-cream-200 sm:w-32 sm:flex-col sm:border-l sm:border-t-0">
-          <Link
-            href={`/account/reservations/edit/${id}`}
-            className="flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-ink-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
-          >
-            <PencilSquareIcon className="h-5 w-5" />
-            <span>Edit</span>
-          </Link>
-          <CancelReservation bookingId={id} onCancel={onCancel} />
-        </div>
-      )}
     </li>
-  );
-}
-
-// One action on the side of a card, like "My stay" or "Details"
-function CardLink({ href, icon: Icon, children }) {
-  return (
-    <div className="flex border-t border-cream-200 sm:w-32 sm:flex-col sm:border-l sm:border-t-0">
-      <Link
-        href={href}
-        className="flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-ink-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
-      >
-        <Icon className="h-5 w-5" />
-        <span>{children}</span>
-      </Link>
-    </div>
   );
 }
 

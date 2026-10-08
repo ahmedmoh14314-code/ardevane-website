@@ -64,6 +64,32 @@ describe("sortBookings", () => {
   });
 });
 
+describe("asking for things before arrival", () => {
+  it("is for the stay now, or else the next confirmed booking", () => {
+    const { servicesFor, upcoming } = sortBookings(
+      [
+        booking(1, "pending", "2026-11-10", "2026-11-13"),
+        booking(2, "reserved", "2026-11-20", "2026-11-23"),
+      ],
+      today
+    );
+
+    // A request still waiting for the hotel is upcoming, but has no services
+    expect(upcoming.map((b) => b.id)).toEqual([1, 2]);
+    expect(servicesFor.id).toBe(2);
+  });
+
+  it("has nothing to offer with only a request waiting", () => {
+    const { state, servicesFor } = sortBookings(
+      [booking(1, "pending", "2026-11-10", "2026-11-13")],
+      today
+    );
+
+    expect(state).toBe("upcoming");
+    expect(servicesFor).toBe(null);
+  });
+});
+
 describe("stayDay", () => {
   const stay = { startDate: "2026-11-03", endDate: "2026-11-08", numNights: 5 };
 

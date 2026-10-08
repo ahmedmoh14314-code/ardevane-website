@@ -6,6 +6,26 @@ module.exports = {
       // The same palette as Ardevane Operations, so the guest site and the
       // staff dashboard look like one product
       colors: {
+        // The Ardevane identity: warm sand paper, deep forest ink, and the
+        // bark brown of the cabins
+        sand: {
+          50: "#faf6ef",
+          100: "#f4ede2",
+          200: "#ebe2d3",
+          300: "#ddd0bb",
+        },
+        forest: {
+          700: "#2f3d35",
+          800: "#232e28",
+          900: "#1b241f",
+          950: "#131a16",
+        },
+        bark: {
+          400: "#b98a5c",
+          500: "#9c6c3f",
+          600: "#835631",
+          700: "#6b4427",
+        },
         brand: {
           50: "#eef5f1",
           100: "#d9ebe2",
@@ -28,9 +48,9 @@ module.exports = {
           700: "#8a6532",
         },
         cream: {
-          50: "#faf8f3",
-          100: "#f0ece4",
-          200: "#e3ddd1",
+          50: "#faf6ef",
+          100: "#f4ede2",
+          200: "#ebe2d3",
         },
         ink: {
           400: "#9ca3af",
@@ -43,7 +63,9 @@ module.exports = {
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
-        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "Georgia", "serif"],
+        label: ["var(--font-label)", "system-ui", "sans-serif"],
+        script: ["var(--font-script)", "cursive"],
       },
       boxShadow: {
         soft: "0 0.4rem 1.6rem rgba(23, 43, 34, 0.06)",
@@ -58,10 +80,16 @@ module.exports = {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        // A highlight that crosses a badge now and then
+        shine: {
+          "0%, 70%": { transform: "translateX(0) skewX(-12deg)" },
+          "100%": { transform: "translateX(500%) skewX(-12deg)" },
+        },
       },
       animation: {
         rise: "rise 0.5s ease-out both",
         fade: "fade 0.4s ease-out both",
+        shine: "shine 3.5s ease-in-out infinite",
       },
     },
   },

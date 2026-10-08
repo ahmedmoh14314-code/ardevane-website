@@ -8,12 +8,13 @@ export default function SubmitButton({
   pendingLabel,
   disabled = false,
   className = "",
+  look = "primary",
 }) {
   const { pending } = useFormStatus();
 
   return (
     <button
-      className={`btn-primary px-8 py-3.5 ${className}`}
+      className={`${look === "forest" ? "btn-forest" : "btn-primary"} px-8 py-3.5 ${className}`}
       disabled={pending || disabled}
     >
       {pending ? (

@@ -15,23 +15,23 @@ async function CabinList({ filter }) {
 
   if (!displayedCabins.length)
     return (
-      <p className="card p-10 text-center text-ink-600">
+      <p className="border-y border-sand-200 py-12 text-center font-display text-lg text-ink-600">
         No cabin of this size is open right now. Try another size.
       </p>
     );
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
       {displayedCabins.map((cabin, i) => (
-        <div
+        <li
           key={cabin.id}
           className="animate-rise"
           style={{ animationDelay: `${i * 50}ms` }}
         >
           <CabinCard cabin={cabin} />
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 

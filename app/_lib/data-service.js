@@ -159,7 +159,7 @@ export async function getStayRequests(bookingId) {
   const { data, error } = await createClient()
     .from("requests")
     .select(
-      "id, created_at, type, status, title, note, priority, requestedFor, request_items(name, quantity, unitPrice)"
+      "id, created_at, type, status, title, note, priority, requestedFor, requestedDate, request_items(name, quantity, unitPrice, services(image))"
     )
     .eq("bookingId", bookingId)
     .order("created_at", { ascending: false });
@@ -172,11 +172,12 @@ export async function getStayRequests(bookingId) {
   return data;
 }
 
-// The breakfast menu, for signed-in guests
+// The dining menu, for signed-in guests: every dish with its section,
+// description and photo
 export async function getMenu() {
   const { data, error } = await createClient()
     .from("services")
-    .select("id, name, price")
+    .select("id, name, price, course, description, image")
     .eq("category", "menu")
     .eq("isActive", true)
     .order("price", { ascending: false });

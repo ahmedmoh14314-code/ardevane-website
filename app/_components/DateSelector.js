@@ -1,71 +1,70 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   differenceInDays,
+  isAfter,
   isBefore,
   isSameDay,
-  isWithinInterval,
   startOfToday,
-  subDays,
 } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useReservation } from "./ReservationContext";
 import { formatCurrency, getNightlyPrice } from "../_lib/pricing";
-
-// Does the picked stay run over a night someone else has?
-function isAlreadyBooked(range, takenNights) {
-  return (
-    range.from &&
-    range.to &&
-    takenNights.some((night) =>
-      isWithinInterval(night, { start: range.from, end: subDays(range.to, 1) })
-    )
-  );
-}
+import { nextRange, pickableRange } from "../_lib/stay";
 
 // takenNights are the nights other guests have. Their departure day is free,
 // so a new guest can arrive on it; and the first taken night after a picked
 // arrival can still be the new guest's departure day.
 function DateSelector({ settings, cabin, takenNights }) {
   const { range, setRange, resetRange } = useReservation();
-
-  const displayRange = isAlreadyBooked(range, takenNights) ? {} : range;
-
-  const numNights =
-    displayRange.from && displayRange.to
-      ? differenceInDays(displayRange.to, displayRange.from)
-      : 0;
-
   const { minBookingLength, maxBookingLength } = settings;
 
-  const firstTakenAfterArrival =
-    range.from && !range.to
-      ? takenNights
-          .filter((night) => night > range.from)
-          .sort((a, b) => a - b)[0]
-      : null;
+  const isComplete = Boolean(range.from && range.to);
+  const picked = pickableRange(range, takenNights, settings);
+
+  // Dates remembered from another cabin, or from the home page search, that
+  // this cabin can't have are let go, so the guest picks again from clean
+  useEffect(
+    function () {
+      if (isComplete && !picked.from) resetRange();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isComplete, picked.from]
+  );
+
+  const numNights = picked.from ? differenceInDays(picked.to, picked.from) : 0;
+  const isPickingDeparture = Boolean(range.from && !range.to);
 
   function isDisabled(day) {
     if (isBefore(day, startOfToday())) return true;
 
-    const isTaken = takenNights.some((night) => isSameDay(night, day));
-    if (!isTaken) return false;
+    // While the departure is picked, a stay too short can't be ended; a
+    // click past a taken night, or too far away, starts a new stay there
+    if (isPickingDeparture && isAfter(day, range.from)) {
+      if (differenceInDays(day, range.from) < minBookingLength) return true;
+      // Leaving on the morning the next guest arrives is fine
+      const firstTaken = takenNights
+        .map((night) => new Date(night))
+        .filter((night) => isAfter(night, range.from))
+        .sort((a, b) => a - b)[0];
+      if (firstTaken && isSameDay(day, firstTaken)) return false;
+    }
 
-    // Leaving on the morning the next guest arrives is fine
-    return !(firstTakenAfterArrival && isSameDay(day, firstTakenAfterArrival));
+    return takenNights.some((night) => isSameDay(new Date(night), day));
   }
 
   return (
-    <div className="flex flex-col border-b border-cream-200 lg:border-b-0 lg:border-r">
-      <div className="flex-1 overflow-x-auto px-4 py-8 sm:px-8">
+    <div>
+      <div className="overflow-x-auto">
         <DayPicker
-          className="mx-auto w-fit"
+          className="w-fit"
           mode="range"
-          onSelect={setRange}
-          selected={displayRange}
-          min={minBookingLength + 1}
-          max={maxBookingLength}
+          onSelect={(_, day) =>
+            setRange(nextRange(range, day, takenNights, settings))
+          }
+          selected={isPickingDeparture ? range : picked}
           fromMonth={new Date()}
           fromDate={new Date()}
           toYear={new Date().getFullYear() + 5}
@@ -73,30 +72,21 @@ function DateSelector({ settings, cabin, takenNights }) {
           numberOfMonths={2}
           disabled={isDisabled}
         />
-
-        <p className="mt-4 text-center text-sm text-ink-500">
-          Stays of {minBookingLength} to {maxBookingLength} nights. Faded days
-          are already taken.
-        </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-brand-50 px-6 py-4 sm:px-8">
-        <p className="text-ink-700">
-          <span className="text-xl font-semibold text-ink-800">
-            {formatCurrency(getNightlyPrice(cabin))}
-          </span>{" "}
-          / night
-          {numNights > 0 && (
-            <span className="ml-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-brand-700">
-              &times; {numNights} {numNights === 1 ? "night" : "nights"}
-            </span>
-          )}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-sand-200 pt-4">
+        <p className="font-label text-[0.85rem] text-ink-600">
+          {isPickingDeparture
+            ? `Now pick your departure day, ${minBookingLength} nights or more.`
+            : `Stays of ${minBookingLength} to ${maxBookingLength} nights. Faded days are taken.`}
+          {numNights > 0 &&
+            ` · ${numNights} ${numNights === 1 ? "night" : "nights"} picked, ${formatCurrency(getNightlyPrice(cabin))} a night.`}
         </p>
 
         {(range.from || range.to) && (
           <button
             onClick={resetRange}
-            className="btn-secondary px-4 py-2 text-sm"
+            className="rounded-full border border-sand-300 px-4 py-1.5 font-display text-ink-700 hover:border-forest-700"
           >
             Clear dates
           </button>

@@ -10,6 +10,17 @@ const nextConfig = {
       },
     ],
   },
+  // My Stay used to live inside the account pages
+  async redirects() {
+    return [
+      { source: "/account/stay", destination: "/my-stay", permanent: false },
+      {
+        source: "/account/stay/menu",
+        destination: "/my-stay/menu",
+        permanent: false,
+      },
+    ];
+  },
   // output: "export",
 };
 

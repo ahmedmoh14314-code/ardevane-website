@@ -14,8 +14,10 @@ export default async function Page() {
   return (
     <div>
       <header className="mb-8">
-        <p className="eyebrow mb-2">Guest area</p>
-        <h1 className="page-title">Your reservations</h1>
+        <h1 className="page-title">Reservations</h1>
+        <p className="mt-2 font-label text-[1rem] text-ink-600">
+          Every stay you have booked with us, coming up and before.
+        </p>
       </header>
 
       {bookings.length === 0 ? (

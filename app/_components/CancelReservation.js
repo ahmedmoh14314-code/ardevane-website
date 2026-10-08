@@ -31,17 +31,17 @@ function CancelReservation({ bookingId, onCancel }) {
     <button
       onClick={handleClick}
       disabled={isPending}
-      className={`flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+      className={`inline-flex min-w-[6.5rem] items-center justify-center gap-2 rounded-[3px] border px-4 py-2 font-display text-[0.98rem] transition-colors ${
         isAsking
-          ? "bg-[#9b3b23] text-white hover:bg-[#7d2e1a]"
-          : "text-ink-600 hover:bg-[#f8e2da] hover:text-[#9b3b23]"
+          ? "border-[#9b3b23] bg-[#9b3b23] text-white hover:bg-[#7d2e1a]"
+          : "border-sand-300 bg-white text-ink-700 hover:border-[#9b3b23] hover:text-[#9b3b23]"
       }`}
     >
       {isPending ? (
         <SpinnerMini />
       ) : (
         <>
-          <XCircleIcon className="h-5 w-5" />
+          <XCircleIcon className="h-4 w-4" />
           <span>{isAsking ? "Sure?" : "Cancel"}</span>
         </>
       )}

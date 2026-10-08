@@ -3,16 +3,26 @@ import { formatCurrency } from "../_lib/pricing";
 
 // What a stay costs and what has been paid, for the guest to read. The
 // front desk adds the charges and records the payments; nothing here can
-// be changed by the guest.
-function StayFolio({ folio, charges = [], id }) {
+// be changed by the guest. bare: without its own card and heading, for a
+// panel that has them already.
+function StayFolio({ folio, charges = [], id, bare = false }) {
   if (!folio) return null;
 
   const { accommodation, extras, total, paid, remaining } = folio;
 
   return (
-    <section id={id} className="card scroll-mt-24 p-6 sm:p-8">
-      <p className="eyebrow mb-1">Stay charges</p>
-      <h2 className="mb-6 font-display text-2xl text-brand-900">Your folio</h2>
+    <section
+      id={id}
+      className={bare ? "font-display" : "card scroll-mt-24 p-6 sm:p-8"}
+    >
+      {!bare && (
+        <>
+          <p className="eyebrow mb-1">Stay charges</p>
+          <h2 className="mb-6 font-display text-2xl text-forest-950">
+            Your folio
+          </h2>
+        </>
+      )}
 
       <dl className="space-y-2 text-ink-700">
         <div className="flex justify-between gap-4">
@@ -21,7 +31,7 @@ function StayFolio({ folio, charges = [], id }) {
         </div>
 
         {charges.length > 0 && (
-          <ul className="space-y-1.5 border-l-2 border-cream-200 py-1 pl-4 text-sm text-ink-600">
+          <ul className="space-y-1.5 border-l-2 border-sand-200 py-1 pl-4 text-sm text-ink-600">
             {charges.map((charge) => (
               <li key={charge.id} className="flex justify-between gap-4">
                 <span>
@@ -43,19 +53,19 @@ function StayFolio({ folio, charges = [], id }) {
           <dd className="tabular-nums">{formatCurrency(extras)}</dd>
         </div>
 
-        <div className="flex justify-between gap-4 border-t border-cream-200 pt-3 text-lg font-semibold text-ink-900">
+        <div className="flex justify-between gap-4 border-t border-sand-200 pt-3 text-lg font-semibold text-ink-900">
           <dt>Total</dt>
           <dd className="tabular-nums">{formatCurrency(total)}</dd>
         </div>
 
-        <div className="flex justify-between gap-4 text-brand-700">
+        <div className="flex justify-between gap-4 text-forest-900">
           <dt>Paid</dt>
           <dd className="tabular-nums">{formatCurrency(paid)}</dd>
         </div>
 
         <div
           className={`flex justify-between gap-4 font-semibold ${
-            remaining > 0 ? "text-[#9b3b23]" : "text-brand-700"
+            remaining > 0 ? "text-[#9b3b23]" : "text-forest-900"
           }`}
         >
           <dt>Remaining</dt>

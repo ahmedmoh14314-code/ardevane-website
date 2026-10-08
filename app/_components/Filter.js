@@ -9,6 +9,8 @@ const options = [
   { value: "large", label: "8+ guests" },
 ];
 
+// The cabin sizes, as a row of pills. On phones the row scrolls sideways
+// rather than wrapping.
 function Filter() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -23,21 +25,29 @@ function Filter() {
   }
 
   return (
-    <div className="flex flex-wrap gap-1 rounded-xl border border-cream-200 bg-white p-1 shadow-sm">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          onClick={() => handleFilter(option.value)}
-          aria-pressed={option.value === activeFilter}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            option.value === activeFilter
-              ? "bg-brand-600 text-white"
-              : "text-ink-600 hover:bg-brand-50 hover:text-brand-700"
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div
+      role="group"
+      aria-label="Cabin size"
+      className="-mx-5 flex gap-2.5 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
+    >
+      {options.map((option) => {
+        const isActive = option.value === activeFilter;
+
+        return (
+          <button
+            key={option.value}
+            onClick={() => handleFilter(option.value)}
+            aria-pressed={isActive}
+            className={`min-h-[2.75rem] shrink-0 whitespace-nowrap rounded-full border px-5 font-display text-[1rem] transition-colors ${
+              isActive
+                ? "border-forest-900 bg-forest-900 text-sand-50"
+                : "border-sand-300 bg-transparent text-ink-700 hover:border-forest-700 hover:text-forest-900"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

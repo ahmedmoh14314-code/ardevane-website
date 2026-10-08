@@ -73,14 +73,14 @@ function UpdateProfileForm({ guest, children }) {
       {success && (
         <p
           role="status"
-          className="flex animate-fade items-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-700"
+          className="flex animate-fade items-center gap-2 rounded-[3px] bg-[#e2efe6] px-4 py-3 font-label text-sm text-[#1d5a3d]"
         >
           <CheckCircleIcon className="h-5 w-5" />
           {success}
         </p>
       )}
 
-      <div className="flex justify-end border-t border-cream-200 pt-6">
+      <div className="flex justify-end border-t border-sand-200 pt-6">
         <SubmitButton pendingLabel="Saving…">Save profile</SubmitButton>
       </div>
     </form>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
 import {
+  ArrowLeftIcon,
   CalendarDaysIcon,
   ShieldCheckIcon,
   UsersIcon,
@@ -44,22 +45,23 @@ export default async function Page({ searchParams }) {
   const changeLink = `/cabins/${cabin.id}#reserve`;
 
   return (
-    <div className="page">
+    <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-8 sm:pb-24 sm:pt-8">
       <Link
         href={changeLink}
-        className="mb-6 inline-block text-sm font-medium text-ink-500 hover:text-brand-700"
+        className="mb-5 inline-flex items-center gap-2 font-display text-ink-700 hover:text-forest-900"
       >
-        &larr; Change dates or guests
+        <ArrowLeftIcon className="h-4 w-4" />
+        Change dates or guests
       </Link>
 
-      <header className="mb-8">
+      <header className="mb-7">
         <p className="eyebrow mb-2">Almost there</p>
         <h1 className="page-title">Review your reservation</h1>
       </header>
 
-      <div className="grid animate-rise gap-8 lg:grid-cols-[3fr_2fr]">
-        <section className="card overflow-hidden">
-          <div className="relative aspect-[16/7] bg-cream-100">
+      <div className="grid animate-rise items-start gap-6 lg:grid-cols-[3fr_2fr] lg:gap-8">
+        <section className="overflow-hidden rounded-md border border-sand-200 bg-sand-50 shadow-soft">
+          <div className="relative aspect-[16/8] bg-sand-200">
             <Image
               src={cabin.image}
               alt={`Cabin ${cabin.name}`}
@@ -69,29 +71,29 @@ export default async function Page({ searchParams }) {
             />
           </div>
 
-          <div className="space-y-5 p-6 sm:p-8">
-            <h2 className="font-display text-3xl text-brand-900">
+          <div className="p-5 sm:p-7">
+            <h2 className="font-display text-[1.9rem] leading-tight text-forest-950">
               Cabin {cabin.name}
             </h2>
 
-            <ul className="space-y-3 text-ink-700">
+            <ul className="mt-4 space-y-3 font-label text-[0.95rem] text-ink-700">
               <li className="flex items-center gap-3">
-                <CalendarDaysIcon className="h-5 w-5 text-brand-600" />
+                <CalendarDaysIcon className="h-5 w-5 shrink-0 text-bark-500" />
                 {format(toDay(stay.from), "EEE, MMM d")} &ndash;{" "}
                 {format(toDay(stay.to), "EEE, MMM d, yyyy")}
               </li>
               <li className="flex items-center gap-3">
-                <UsersIcon className="h-5 w-5 text-brand-600" />
+                <UsersIcon className="h-5 w-5 shrink-0 text-bark-500" />
                 {stay.guests} {stay.guests === 1 ? "guest" : "guests"}
               </li>
               <li className="flex items-center gap-3">
-                <ShieldCheckIcon className="h-5 w-5 text-brand-600" />
+                <ShieldCheckIcon className="h-5 w-5 shrink-0 text-bark-500" />
                 Free changes and cancellation until the day before you arrive
               </li>
             </ul>
 
             {quote && (
-              <dl className="space-y-2 rounded-xl bg-cream-50 p-5">
+              <dl className="mt-6 space-y-3 border-t border-sand-200 pt-5 font-label text-[0.95rem]">
                 <div className="flex justify-between text-ink-600">
                   <dt>
                     {formatCurrency(quote.nightly_price)} &times; {quote.nights}{" "}
@@ -99,15 +101,19 @@ export default async function Page({ searchParams }) {
                   </dt>
                   <dd>{formatCurrency(quote.total_price)}</dd>
                 </div>
-                <div className="flex justify-between border-t border-cream-200 pt-2 text-lg font-semibold text-ink-800">
-                  <dt>Total, paid at the cabin</dt>
-                  <dd>{formatCurrency(quote.total_price)}</dd>
+                <div className="flex items-baseline justify-between border-t border-sand-200 pt-3">
+                  <dt className="font-display text-[1.15rem] text-forest-950">
+                    Total, paid at the cabin
+                  </dt>
+                  <dd className="font-display text-[1.6rem] text-forest-950">
+                    {formatCurrency(quote.total_price)}
+                  </dd>
                 </div>
               </dl>
             )}
 
             {error && (
-              <div className="space-y-4">
+              <div className="mt-6 space-y-4">
                 <FormError message={error} />
                 <Link href={changeLink} className="btn-secondary">
                   Choose other dates
@@ -118,7 +124,7 @@ export default async function Page({ searchParams }) {
         </section>
 
         {quote && (
-          <aside className="card h-fit p-6 sm:p-8">
+          <aside className="rounded-md border border-sand-200 bg-white p-5 shadow-soft sm:p-7 lg:sticky lg:top-24">
             {user ? (
               <ConfirmReservationForm stay={stay} user={user} />
             ) : (

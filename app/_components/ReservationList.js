@@ -1,19 +1,38 @@
 "use client";
 
-import { useOptimistic } from "react";
+import { useOptimistic, useState } from "react";
 import ReservationCard from "./ReservationCard";
 import { cancelBooking } from "../_lib/actions";
 import { sortBookings } from "../_lib/account";
 
-const groups = [
-  { key: "stay", title: "Staying now" },
-  { key: "upcoming", title: "Upcoming" },
-  { key: "history", title: "Past stays" },
+const isClosed = (booking) =>
+  booking.status === "cancelled" || booking.status === "no_show";
+
+// The reservations in three tabs: what is ahead (and any stay going on),
+// what is behind, and what was called off
+function groupBookings(bookings, today) {
+  const { upcoming, history } = sortBookings(bookings, today);
+  const staying = bookings
+    .filter((booking) => booking.status === "checked_in")
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const behind = history.filter((booking) => !staying.includes(booking));
+
+  return {
+    upcoming: [...staying, ...upcoming],
+    past: behind.filter((booking) => !isClosed(booking)),
+    cancelled: behind.filter(isClosed),
+  };
+}
+
+const tabs = [
+  { key: "upcoming", label: "Upcoming", empty: "Nothing planned yet." },
+  { key: "past", label: "Past", empty: "No past stays yet." },
+  { key: "cancelled", label: "Cancelled", empty: "Nothing cancelled." },
 ];
 
 function ReservationList({ bookings, today }) {
-  // A cancelled reservation shows as cancelled at once, while the database
-  // catches up. It stays in the list, under past stays.
+  // A cancelled reservation moves to "Cancelled" at once, while the
+  // database catches up
   const [optimisticBookings, optimisticCancel] = useOptimistic(
     bookings,
     (curBookings, bookingId) =>
@@ -27,36 +46,61 @@ function ReservationList({ bookings, today }) {
     await cancelBooking(bookingId);
   }
 
-  // The stay that is checked in, reservations ahead, then everything else
-  const sorted = sortBookings(optimisticBookings, today);
-  const lists = {
-    stay: sorted.stay ? [sorted.stay] : [],
-    upcoming: sorted.upcoming,
-    history: sorted.history,
-  };
+  const groups = groupBookings(optimisticBookings, today);
+  const [tab, setTab] = useState(
+    groups.upcoming.length > 0 ? "upcoming" : "past"
+  );
+  const { empty } = tabs.find(({ key }) => key === tab);
 
   return (
-    <div className="space-y-10">
-      {groups.map(
-        ({ key, title }) =>
-          lists[key].length > 0 && (
-            <section key={key}>
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-500">
-                {title} &middot; {lists[key].length}
-              </h2>
+    <div>
+      <div
+        role="tablist"
+        className="-mx-4 mb-6 flex gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+      >
+        {tabs.map(({ key, label }) => {
+          const isActive = key === tab;
 
-              <ul className="space-y-4">
-                {lists[key].map((booking) => (
-                  <ReservationCard
-                    booking={booking}
-                    today={today}
-                    onCancel={handleCancel}
-                    key={booking.id}
-                  />
-                ))}
-              </ul>
-            </section>
-          )
+          return (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setTab(key)}
+              className={`flex min-h-[2.75rem] shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-5 font-display text-[1rem] transition-colors ${
+                isActive
+                  ? "border-forest-900 bg-forest-900 text-sand-50"
+                  : "border-sand-300 text-ink-700 hover:border-forest-700 hover:text-forest-900"
+              }`}
+            >
+              {label}
+              <span
+                className={`rounded-full px-2 py-0.5 font-label text-xs ${
+                  isActive ? "bg-white/15" : "bg-sand-200 text-ink-600"
+                }`}
+              >
+                {groups[key].length}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {groups[tab].length === 0 ? (
+        <p className="rounded-md border border-dashed border-sand-300 px-6 py-12 text-center font-display text-[1.1rem] text-ink-600">
+          {empty}
+        </p>
+      ) : (
+        <ul className="space-y-4">
+          {groups[tab].map((booking) => (
+            <ReservationCard
+              booking={booking}
+              today={today}
+              onCancel={handleCancel}
+              key={booking.id}
+            />
+          ))}
+        </ul>
       )}
     </div>
   );

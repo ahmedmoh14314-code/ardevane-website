@@ -25,7 +25,7 @@ export default async function Page({ params }) {
     <div>
       <Link
         href="/account/reservations"
-        className="mb-6 inline-block text-sm font-medium text-ink-500 hover:text-brand-700"
+        className="mb-6 inline-block font-display text-ink-600 hover:text-forest-900"
       >
         &larr; Your reservations
       </Link>
@@ -44,8 +44,8 @@ export default async function Page({ params }) {
         <EditReservationForm booking={booking} settings={settings} />
       ) : (
         <p className="card p-6 text-ink-600">
-          This reservation can no longer be changed online. Please contact
-          the front desk.
+          This reservation can no longer be changed online. Please contact the
+          front desk.
         </p>
       )}
     </div>

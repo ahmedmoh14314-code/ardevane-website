@@ -62,7 +62,7 @@ function EditReservationForm({ booking, settings }) {
 
       <FormError message={error} />
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-cream-200 pt-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-sand-200 pt-6">
         <p className="text-ink-600">
           Total{" "}
           <span className="text-xl font-semibold text-ink-800">
