@@ -14,12 +14,12 @@ function capacityFor(guests) {
 }
 
 const fieldClass =
-  "block w-full bg-transparent font-display text-[1.05rem] text-forest-950 focus:outline-none";
+  "block w-full bg-transparent font-display text-[1.15rem] text-forest-950 focus:outline-none";
 
 function Field({ label, children }) {
   return (
-    <label className="block border-b border-sand-300 px-1 pb-2.5 pt-1 md:border-b-0 md:border-r md:px-5 md:py-1">
-      <span className="mb-1 block font-label text-[0.72rem] uppercase tracking-[0.18em] text-ink-500">
+    <label className="block border-b border-sand-300 px-1 pb-3 pt-1 md:flex md:flex-col md:justify-center md:border-b-0 md:border-r md:px-6 md:py-2">
+      <span className="mb-1 block font-label text-[0.82rem] text-ink-500">
         {label}
       </span>
       {children}
@@ -56,7 +56,7 @@ function HeroSearch() {
   return (
     <form
       onSubmit={search}
-      className="grid gap-4 rounded-md bg-sand-50 p-4 shadow-lift md:grid-cols-[1fr_1fr_0.8fr_auto] md:items-center md:gap-0 md:p-3"
+      className="grid gap-4 rounded-lg bg-sand-50 p-4 shadow-lift md:grid-cols-[1fr_1fr_0.8fr_auto] md:items-stretch md:gap-0 md:p-3"
     >
       <Field label="Check in">
         <input
@@ -96,7 +96,9 @@ function HeroSearch() {
         </select>
       </Field>
 
-      <button className="btn-forest md:ml-3">Search cabins</button>
+      <button className="btn-forest md:ml-3 md:min-h-[3.6rem] md:px-9">
+        Search cabins
+      </button>
     </form>
   );
 }

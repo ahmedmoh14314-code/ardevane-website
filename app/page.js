@@ -59,46 +59,50 @@ export default async function Page() {
 
   return (
     <>
-      {/* 1. The hero: the cabin at sunset, a few words, and the search.
-          On phones the words are short and the search comes right under
-          the photo; on wide screens the search sits on it. */}
+      {/* 1. The hero: the cabin lit at dusk, filling the top of the page
+          with the header laid over it; the words sit low on the left and
+          the search runs along the bottom of the photo. */}
       <section className="relative isolate">
-        <div className="relative min-h-[26rem] overflow-hidden sm:min-h-[32rem] md:min-h-[42rem]">
+        <div className="relative overflow-hidden">
           <Image
             src={hero}
-            alt="A wooden cabin with a lit deck above a lake, mountains behind, at sunset"
+            alt="A glass-fronted wooden cabin lit at dusk, pines around it and snowy peaks behind"
             fill
             priority
             placeholder="blur"
             quality={85}
             sizes="100vw"
-            className="-z-10 object-cover object-[70%_center]"
+            className="-z-10 object-cover object-[62%_center]"
+          />
+          {/* Shade at the top, under the header, and at the bottom, under
+              the words, so both read on any part of the photo */}
+          <div
+            className="absolute inset-0 -z-10 bg-gradient-to-b from-forest-950/60 via-forest-950/10 to-forest-950/55"
+            aria-hidden="true"
           />
 
-          <div className="mx-auto max-w-7xl px-5 pb-16 pt-10 sm:px-8 sm:pt-14 md:pb-44 md:pt-16">
-            <p className="kicker mb-4 hidden text-sand-50 [text-shadow:0_2px_14px_rgba(0,0,0,0.55)] sm:block">
-              Private cabins. Wilder places.
-            </p>
-            <h1 className="max-w-[28rem] font-display text-[2.8rem] leading-[1] tracking-[-0.02em] text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.55)] sm:text-[4.4rem] sm:leading-[0.98]">
-              A more meaningful mountain stay.
-            </h1>
-            <p className="mt-4 max-w-md text-[1.08rem] leading-relaxed text-sand-50 [text-shadow:0_2px_14px_rgba(0,0,0,0.55)] sm:mt-5 sm:text-[1.15rem]">
-              Private wooden cabins between the pines and the lake.
-            </p>
-            <div className="mt-7 hidden gap-3 sm:flex">
-              <Link href="/cabins" className="btn-forest">
-                Explore cabins
-              </Link>
-              <Link href="/about" className="btn-outline-light">
-                Our story
-              </Link>
+          {/* The words sit low. On wide screens the photo keeps going
+              under them, with the search laid along its bottom. */}
+          <div className="mx-auto flex min-h-[30rem] max-w-7xl flex-col justify-end px-5 pb-16 pt-24 sm:min-h-[34rem] sm:px-8 md:min-h-[min(46rem,94vh)] md:pb-44 md:pt-32">
+            <div className="max-w-2xl">
+              <p className="kicker mb-4 text-[0.78rem] text-gold-300 [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]">
+                Welcome to Ardevane
+              </p>
+              <h1 className="font-display text-[2.8rem] leading-[1] tracking-[-0.02em] text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.55)] sm:text-[4.6rem] sm:leading-[0.98]">
+                Nature stays feel different here.
+              </h1>
+              <p className="mt-4 max-w-lg text-[1.08rem] leading-relaxed text-sand-50 [text-shadow:0_2px_14px_rgba(0,0,0,0.55)] sm:mt-5 sm:text-[1.2rem]">
+                Cozy cabins in the heart of the mountains. A peaceful place to
+                relax, explore and create unforgettable memories.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Pulled up over the photo, so it has to sit above it, or the
-            photo's box takes the taps meant for the fields */}
-        <div className="relative z-10 mx-auto -mt-10 max-w-5xl px-5 sm:px-8 md:-mt-20">
+        {/* On phones the search hangs off the bottom of the photo; on wide
+            screens it lies on the photo. Above the photo's box either way,
+            or the box takes the taps meant for the fields. */}
+        <div className="relative z-10 mx-auto -mt-10 max-w-7xl px-5 sm:px-8 md:absolute md:inset-x-0 md:bottom-10 md:mt-0">
           <HeroSearch />
         </div>
       </section>
