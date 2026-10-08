@@ -3,16 +3,20 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-variant-numeric: lining-nums;
   }
 
   ::selection {
-    background-color: theme("colors.brand.100");
+    background-color: theme("colors.sand.300");
   }
 
   :focus-visible {
-    outline: 2px solid theme("colors.brand.600");
+    outline: 2px solid theme("colors.forest.700");
     outline-offset: 2px;
   }
 }
@@ -82,8 +86,9 @@
     @apply mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 sm:py-14;
   }
 
+  /* Every page starts with the same size of title */
   .page-title {
-    @apply font-display text-[2.4rem] leading-tight text-forest-950 sm:text-[2.9rem];
+    @apply font-display text-[2.4rem] leading-none text-forest-950 sm:text-[3.2rem];
   }
 
   .card {
@@ -99,8 +104,8 @@
     width: 48px;
     aspect-ratio: 1;
     border-radius: 50%;
-    border: 4px solid theme("colors.brand.100");
-    border-right-color: theme("colors.brand.600");
+    border: 4px solid theme("colors.sand.300");
+    border-right-color: theme("colors.forest.900");
     animation: rotate 1s infinite linear;
   }
 
@@ -132,18 +137,24 @@
   }
 }
 
-/* Date picker, in the brand colours */
+/* Date picker, in the identity's colours: the arrival and departure in
+   deep forest, the nights between them on sand */
 .rdp {
   --rdp-cell-size: 40px !important;
-  --rdp-accent-color: theme("colors.brand.600") !important;
-  --rdp-background-color: theme("colors.brand.50") !important;
-  --rdp-outline: 2px solid theme("colors.brand.500") !important;
+  --rdp-accent-color: theme("colors.forest.900") !important;
+  --rdp-background-color: theme("colors.sand.200") !important;
+  --rdp-outline: 2px solid theme("colors.forest.700") !important;
   margin: 0 !important;
+  font-family: var(--font-display);
 }
 
 .rdp-day_selected:not(.rdp-day_range_start):not(.rdp-day_range_end) {
-  background-color: theme("colors.brand.100") !important;
-  color: theme("colors.brand.900") !important;
+  background-color: theme("colors.sand.200") !important;
+  color: theme("colors.forest.950") !important;
+}
+
+.rdp-day:not(.rdp-day_selected):not(.rdp-day_disabled):hover {
+  background-color: theme("colors.sand.200") !important;
 }
 
 .rdp-day_disabled {

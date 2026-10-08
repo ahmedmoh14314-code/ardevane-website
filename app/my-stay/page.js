@@ -40,9 +40,7 @@ export default async function Page() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-14 pt-7 sm:px-8 sm:pb-20 sm:pt-10">
       <header className="mb-5 sm:mb-7">
-        <h1 className="font-display text-[2.4rem] leading-none text-forest-950 sm:text-[3.2rem]">
-          My Stay
-        </h1>
+        <h1 className="page-title">My Stay</h1>
         <p className="mt-2 font-label text-[0.95rem] text-ink-600 sm:text-[1.02rem]">
           {stay
             ? "Everything for your stay, brought to your cabin."

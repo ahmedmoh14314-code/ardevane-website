@@ -61,9 +61,7 @@ export default async function Page({ params }) {
           wide screens it stays beside everything, as you scroll */}
       <div className="mt-6 grid gap-x-12 gap-y-8 sm:mt-8 lg:grid-cols-[1fr_24rem]">
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <h1 className="font-display text-[2.4rem] leading-none text-forest-950 sm:text-[3.1rem]">
-            Cabin {name}
-          </h1>
+          <h1 className="page-title">Cabin {name}</h1>
           <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-label text-[0.95rem] text-ink-700">
             <span>Up to {maxCapacity} guests</span>
             {discount > 0 && (

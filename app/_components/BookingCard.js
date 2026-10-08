@@ -104,6 +104,28 @@ function BookingCard({ cabin, settings, takenNights }) {
       <p className="mt-3 text-center font-label text-[0.8rem] leading-relaxed text-ink-600">
         Nothing to pay now. Free cancellation until the day before.
       </p>
+
+      {/* On phones the calendar is far below the card, so once the days
+          are picked the way on follows along at the bottom of the screen */}
+      {hasDates && (
+        <div className="fixed inset-x-0 bottom-[3.4rem] z-30 border-t border-sand-200 bg-sand-50/95 px-4 py-3 backdrop-blur lg:hidden">
+          <Link
+            href={reviewPath({
+              cabinId: cabin.id,
+              from: range.from,
+              to: range.to,
+              guests: numGuests,
+            })}
+            className="btn-forest w-full justify-between px-5"
+          >
+            <span>
+              {numNights} {numNights === 1 ? "night" : "nights"} &middot;{" "}
+              {formatCurrency(getStayPrice(cabin, numNights))}
+            </span>
+            <span>Continue</span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

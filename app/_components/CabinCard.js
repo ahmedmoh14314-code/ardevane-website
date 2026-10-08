@@ -67,7 +67,7 @@ function CabinCard({ cabin }) {
         </p>
       </div>
 
-      <span className="btn-outline mt-4 w-full group-hover:border-forest-900 group-hover:bg-white sm:hidden">
+      <span className="btn-outline mt-4 w-full group-hover:border-forest-900 group-hover:bg-white">
         View cabin
       </span>
     </Link>

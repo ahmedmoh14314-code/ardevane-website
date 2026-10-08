@@ -63,7 +63,7 @@ export default async function Page() {
           On phones the words are short and the search comes right under
           the photo; on wide screens the search sits on it. */}
       <section className="relative isolate">
-        <div className="relative min-h-[26rem] overflow-hidden sm:min-h-[32rem] md:min-h-[38rem]">
+        <div className="relative min-h-[26rem] overflow-hidden sm:min-h-[32rem] md:min-h-[42rem]">
           <Image
             src={hero}
             alt="A wooden cabin with a lit deck above a lake, mountains behind, at sunset"

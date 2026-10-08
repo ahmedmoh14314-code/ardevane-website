@@ -17,9 +17,7 @@ export default function Page({ searchParams }) {
     <div className="mx-auto w-full max-w-7xl px-5 pb-16 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
       {/* Just the title and the sizes: the cabins themselves come straight after */}
       <header className="mb-8 flex flex-col gap-4 border-b border-sand-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-display text-[2rem] leading-none text-forest-950">
-          Our cabins
-        </h1>
+        <h1 className="page-title">Our cabins</h1>
         <Filter />
       </header>
 

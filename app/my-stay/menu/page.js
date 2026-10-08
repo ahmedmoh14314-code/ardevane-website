@@ -31,9 +31,7 @@ export default async function Page() {
       </Link>
 
       <header className="mb-4 mt-4 sm:mb-6">
-        <h1 className="font-display text-[2.4rem] leading-none text-forest-950 sm:text-[3.2rem]">
-          Food & drinks
-        </h1>
+        <h1 className="page-title">Food & drinks</h1>
         <p className="mt-2 font-label text-[0.95rem] text-ink-600 sm:text-[1.02rem]">
           Pick what you like, choose a day and time, and we bring it to Cabin{" "}
           {servicesFor?.cabins.name ?? ""}.
